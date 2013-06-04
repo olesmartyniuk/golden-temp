@@ -96,6 +96,10 @@
 			</DCCReference>
 			<DCCReference Include="uRemotableImpl.pas"/>
 			<DCCReference Include="..\common\uRemotable.pas"/>
+			<None Include="ModelSupport_server\default.txaPackage"/>
+			<None Include="ModelSupport_server\default.txvpck"/>
+			<None Include="ModelSupport_server\uRemotable\default.txvpck"/>
+			<None Include="ModelSupport_server\server\default.txvpck"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
@@ -153,6 +157,7 @@
 					<Platform value="Win64">False</Platform>
 					<Platform value="Win32">True</Platform>
 				</Platforms>
+				<ModelSupport>True</ModelSupport>
 			</BorlandProject>
 			<ProjectFileVersion>12</ProjectFileVersion>
 		</ProjectExtensions>
