@@ -15,29 +15,28 @@ type
   { TGoldenTemp }
   TServerImpl = class(TInvokableClass, IAdministrator)
     public
-      procedure GroupEdit(Account: TAccount; Group: TGroup);stdcall;
-    procedure GroupCreate(Account: TAccount; Name: String; Student: TStudent);stdcall;
-    procedure GroupDel(Account: TAccount; Name: String);stdcall;
-    procedure TeacherEdit(Account: TAccount; Teacher: TTeacher);stdcall;
-    procedure StudentEdit(Account: TAccount; Student: TStudent);
-    function StudentGet(Account: TAccount; StudentLogin: String): TStudentArray;stdcall;
-    procedure TeacherDel(Account: TAccount; TeacherLogin: TTeacher);stdcall;
-    procedure StudentDel(Account: TAccount; StudentLogin: TStudent);stdcall;
-    procedure StudenAdd(Account: TAccount; Student: TStudent);stdcall;
-    procedure TeacherAdd(Account: TAccount; Teacher: TTeacher);stdcall;
+      procedure GroupEdit(Account: TAccount; Group: TGroup); stdcall;
+      procedure GroupCreate(Account: TAccount; Name: string; Student: TStudent); stdcall;
+      procedure GroupDel(Account: TAccount; Name: string); stdcall;
+      procedure TeacherEdit(Account: TAccount; Teacher: TTeacher); stdcall;
+      procedure StudentEdit(Account: TAccount; Student: TStudent);
+      function StudentGet(Account: TAccount; StudentLogin: string): TStudentArray; stdcall;
+      procedure TeacherDel(Account: TAccount; TeacherLogin: TTeacher); stdcall;
+      procedure StudentDel(Account: TAccount; StudentLogin: TStudent); stdcall;
+      procedure StudenAdd(Account: TAccount; Student: TStudent); stdcall;
+      procedure TeacherAdd(Account: TAccount; Teacher: TTeacher); stdcall;
   end;
 
 implementation
 
 { TServerImpl }
 
-procedure TServerImpl.GroupCreate(Account: TAccount; Name: String;
-  Student: TStudent);
+procedure TServerImpl.GroupCreate(Account: TAccount; Name: string; Student: TStudent);
 begin
 
 end;
 
-procedure TServerImpl.GroupDel(Account: TAccount; Name: String);
+procedure TServerImpl.GroupDel(Account: TAccount; Name: string);
 begin
 
 end;
@@ -62,8 +61,7 @@ begin
 
 end;
 
-function TServerImpl.StudentGet(Account: TAccount;
-  StudentLogin: String): TStudentArray;
+function TServerImpl.StudentGet(Account: TAccount; StudentLogin: string): TStudentArray;
 begin
 
 end;
