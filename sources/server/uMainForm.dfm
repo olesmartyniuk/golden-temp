@@ -11,7 +11,6 @@ object MainForm: TMainForm
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
-  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
@@ -57,7 +56,6 @@ object MainForm: TMainForm
     OnClick = ButtonOpenBrowserClick
   end
   object ApplicationEvents1: TApplicationEvents
-    OnIdle = ApplicationEvents1Idle
     Left = 288
     Top = 24
   end
