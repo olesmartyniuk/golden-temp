@@ -70,6 +70,7 @@
 			<DCC_RemoteDebug>true</DCC_RemoteDebug>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+			<DCC_UnitSearchPath>$(GT_IMPORTS)\FIB\;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
 			<DCC_ExeOutput>$(GT_BIN)</DCC_ExeOutput>
 			<VerInfo_Locale>1033</VerInfo_Locale>
@@ -96,10 +97,14 @@
 			</DCCReference>
 			<DCCReference Include="uRemotableImpl.pas"/>
 			<DCCReference Include="..\common\uRemotable.pas"/>
+			<DCCReference Include="uDatabase.pas"/>
+			<DCCReference Include="..\common\uConfig.pas"/>
+			<DCCReference Include="uServerState.pas"/>
 			<None Include="ModelSupport_server\default.txaPackage"/>
 			<None Include="ModelSupport_server\default.txvpck"/>
 			<None Include="ModelSupport_server\uRemotable\default.txvpck"/>
 			<None Include="ModelSupport_server\server\default.txvpck"/>
+			<None Include="ModelSupport_server\server\default.txaPackage"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
