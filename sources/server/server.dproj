@@ -105,6 +105,12 @@
 			<None Include="ModelSupport_server\uRemotable\default.txvpck"/>
 			<None Include="ModelSupport_server\server\default.txvpck"/>
 			<None Include="ModelSupport_server\server\default.txaPackage"/>
+			<None Include="ModelSupport_server\uConfig\default.txvpck"/>
+			<None Include="ModelSupport_server\uRemotableImpl\default.txvpck"/>
+			<None Include="ModelSupport_server\uServerState\default.txvpck"/>
+			<None Include="ModelSupport_server\uWebModule\default.txvpck"/>
+			<None Include="ModelSupport_server\uDatabase\default.txvpck"/>
+			<None Include="ModelSupport_server\uMainForm\default.txvpck"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>

@@ -10,6 +10,10 @@ uses
   Soap.XSBuiltIns;
 
 type
+  TSession = class;
+  TTest = class;
+  TStudent = class;
+  TQuestion = class;
 
   TAccount = class(TRemotable)
     public
@@ -48,6 +52,11 @@ type
       Name: string;
       Surname: string;
       Group: string;
+      /// <clientQualifier>N</clientQualifier>
+      /// <supplierQualifier>1</supplierQualifier>
+      /// <directed>True</directed>
+      /// <label>знаходиться</label>
+      Field1: TGroup;
   end;
 
   TStudents = array of TStudent;
@@ -64,6 +73,20 @@ type
       Greeting: string;
       Congratulations: string;
       Scales: string;
+      /// <link>association</link>
+      /// <clientQualifier>1</clientQualifier>
+      /// <supplierQualifier>N</supplierQualifier>
+      /// <directed>True</directed>
+      /// <label>включає</label>
+      Field1: TQuestion;
+      /// <clientQualifier>M</clientQualifier>
+      /// <supplierQualifier>N</supplierQualifier>
+      /// <label>знаходиться</label>
+      Field2: TGroup;
+      /// <supplierQualifier>1</supplierQualifier>
+      /// <clientQualifier>N</clientQualifier>
+      /// <label>створюється</label>
+      Field3: TTeacher;
   end;
 
   TTests = array of TTest;
@@ -74,6 +97,11 @@ type
       Number: Word;
       Text: string;
       Correct: Boolean;
+      /// <supplierQualifier>1</supplierQualifier>
+      /// <clientQualifier>N</clientQualifier>
+      /// <directed>True</directed>
+      /// <label>належить</label>
+      Field1: TQuestion;
   end;
 
   TVariants = array of TVariant;
@@ -89,6 +117,16 @@ type
       Text: string;
       Ball: Integer;
       MaxBall: Integer;
+      /// <clientCardinality>N</clientCardinality>
+      /// <supplierQualifier>1</supplierQualifier>
+      /// <directed>True</directed>
+      /// <label>належить</label>
+      Field1: TSession;
+      /// <clientQualifier>N</clientQualifier>
+      /// <supplierQualifier>1</supplierQualifier>
+      /// <label>дається</label>
+      /// <directed>True</directed>
+      Field2: TQuestion;
   end;
 
   TAnswers = array of TAnswer;
@@ -110,13 +148,22 @@ type
   TSession = class(TRemotable)
     public
       Id: Integer;
-      Test: TTest;
-      Student: TStudent;
       Active: Boolean;
       LifeTime: Integer;
       Closed: Integer;
       StartTime: TDateTime;
       FinishTime: TDateTime;
+      /// <link>association</link>
+      /// <directed>True</directed>
+      /// <label>включає</label>
+      /// <clientQualifier>N</clientQualifier>
+      /// <supplierQualifier>1</supplierQualifier>
+      Field1: TTest;
+      /// <directed>True</directed>
+      /// <supplierQualifier>1</supplierQualifier>
+      /// <clientQualifier>N</clientQualifier>
+      /// <label>створюється</label>
+      Field2: TStudent;
   end;
 
   TSessions = array of TSession;
