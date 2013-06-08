@@ -231,11 +231,11 @@ begin
   ReqConfigure(Database, Transaction, Query);
   try
     groupId := - 1;
-    if Student.Group <> '' then
+    if Student.Group.Name <> '' then
     begin
       Transaction.StartTransaction;
       Query.SQL.Text := 'select ID from GROUPS where NAME=:NAME';
-      Query.ParamByName('NAME').AsString := Student.Group;
+      Query.ParamByName('NAME').AsString := Student.Group.Name;
       Query.ExecQuery;
       if not Query.Eof then
         groupId := Query.FldByName['ID'].AsInteger;
@@ -330,7 +330,7 @@ begin
         Result[high(Result)].Password := Query.FldByName['PASSW'].AsString;
         Result[high(Result)].name := Query.FldByName['NAME'].AsString;
         Result[high(Result)].Surname := Query.FldByName['SURNAME'].AsString;
-        Result[high(Result)].Group := Query.FldByName['GROUPNAME'].AsString;
+        Result[high(Result)].Group.Name := Query.FldByName['GROUPNAME'].AsString;
         Query.Next;
       end;
     end;
@@ -368,11 +368,11 @@ begin
   ReqConfigure(Database, Transaction, Query);
   try
     groupId := - 1;
-    if NewStudent.Group <> '' then
+    if NewStudent.Group.Name <> '' then
     begin
       Transaction.StartTransaction;
       Query.SQL.Text := 'select ID from GROUPS where NAME=:NAME';
-      Query.ParamByName('NAME').AsString := NewStudent.Group;
+      Query.ParamByName('NAME').AsString := NewStudent.Group.Name;
       Query.ExecQuery;
       if not Query.Eof then
         groupId := Query.FldByName['ID'].AsInteger;
