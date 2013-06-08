@@ -51,12 +51,11 @@ type
       Password: string;
       Name: string;
       Surname: string;
-      Group: string;
       /// <clientQualifier>N</clientQualifier>
       /// <supplierQualifier>1</supplierQualifier>
       /// <directed>True</directed>
       /// <label>знаходиться</label>
-      Field1: TGroup;
+      Group: TGroup;
   end;
 
   TStudents = array of TStudent;
@@ -78,15 +77,15 @@ type
       /// <supplierQualifier>N</supplierQualifier>
       /// <directed>True</directed>
       /// <label>включає</label>
-      Field1: TQuestion;
+      Question: TQuestion;
       /// <clientQualifier>M</clientQualifier>
       /// <supplierQualifier>N</supplierQualifier>
       /// <label>знаходиться</label>
-      Field2: TGroup;
+      Group: TGroup;
       /// <supplierQualifier>1</supplierQualifier>
       /// <clientQualifier>N</clientQualifier>
       /// <label>створюється</label>
-      Field3: TTeacher;
+      Teacher: TTeacher;
   end;
 
   TTests = array of TTest;
@@ -101,7 +100,7 @@ type
       /// <clientQualifier>N</clientQualifier>
       /// <directed>True</directed>
       /// <label>належить</label>
-      Field1: TQuestion;
+      Question: TQuestion;
   end;
 
   TVariants = array of TVariant;
@@ -109,24 +108,19 @@ type
   TAnswer = class(TRemotable)
     public
       Id: Integer;
-      TestName: string;
       TimeSpent: Integer;
-      QuestionNumber: Word;
-      QuestionName: string;
-      QuestionType: Integer;
       Text: string;
       Ball: Integer;
-      MaxBall: Integer;
       /// <clientCardinality>N</clientCardinality>
       /// <supplierQualifier>1</supplierQualifier>
       /// <directed>True</directed>
       /// <label>належить</label>
-      Field1: TSession;
+      Session: TSession;
       /// <clientQualifier>N</clientQualifier>
       /// <supplierQualifier>1</supplierQualifier>
       /// <label>дається</label>
       /// <directed>True</directed>
-      Field2: TQuestion;
+      Question: TQuestion;
   end;
 
   TAnswers = array of TAnswer;
@@ -140,7 +134,6 @@ type
       QuestionType: Integer;
       Topic: string;
       Content: Boolean;
-      Answers: TVariants;
   end;
 
   TQuestions = array of TQuestion;
@@ -158,25 +151,15 @@ type
       /// <label>включає</label>
       /// <clientQualifier>N</clientQualifier>
       /// <supplierQualifier>1</supplierQualifier>
-      Field1: TTest;
+      Test: TTest;
       /// <directed>True</directed>
       /// <supplierQualifier>1</supplierQualifier>
       /// <clientQualifier>N</clientQualifier>
       /// <label>створюється</label>
-      Field2: TStudent;
+      Student: TStudent;
   end;
 
   TSessions = array of TSession;
-
-  { TAdmin = class(TRemotable)
-    public
-    Id: Integer;
-    Login: string;
-    Password: string;
-    Name: string;
-    Surname: string;
-    end;
-  }
 
   IAdministrator = interface(IInvokable)
   ['{EE2A67B5-48C1-4A35-80F3-E3D44594C357}']
