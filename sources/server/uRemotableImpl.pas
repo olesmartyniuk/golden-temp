@@ -23,12 +23,12 @@ type
 
       function TeacherAdd(Account: TAccount; Teacher: TTeacher): Integer; stdcall;
       procedure TeacherEdit(Account: TAccount; Teacher: TTeacher); stdcall;
-      procedure TeacherDel(Account: TAccount; TeacherLogin: TTeacher); stdcall;
+      procedure TeacherDel(Account: TAccount; TeacherLogin: string); stdcall;
       function TeacherGet(Account: TAccount; const Pulpit: string = ''; const Job: string = ''): TTeachers;
 
       function StudenAdd(Account: TAccount; Student: TStudent): Integer; stdcall;
       procedure StudentEdit(Account: TAccount; Student: TStudent);
-      procedure StudentDel(Account: TAccount; StudentId: Integer); stdcall;
+      procedure StudentDel(Account: TAccount; StudentLogin: string); stdcall;
       function StudentGet(Account: TAccount; const Group: string = ''): TStudents; stdcall;
   end;
 
@@ -126,43 +126,129 @@ begin
 end;
 
 function TServerImpl.StudenAdd(Account: TAccount; Student: TStudent): Integer;
+var
+  stud: TStudent;
+  group: TGroup;
 begin
-
+  Server.CheckState;
+  AuthorizeAdmin(Account);
+  CheckNoEmpty(Student.Login);
+  CheckNoEmpty(Student.Password);
+  stud := uDatabase.StudentGet(Student.Login);
+  if Assigned(stud) then
+    raise EAlreadyExists.Create(Format('Студент з логіном "%s" вже існує.', [Student.Login]));
+  if Student.Group.Name <> '' then
+  begin
+    group := uDatabase.GroupGet(Student.Group.Name);
+    if not Assigned(group) then
+      raise ENotExists.Create(Format('Група з іменем "%s" не існує.', [Student.Group.Name]));
+  end;
+  uDatabase.StudentAdd(Student);
 end;
 
-procedure TServerImpl.StudentDel(Account: TAccount; StudentId: Integer);
-begin
 
+procedure TServerImpl.StudentDel(Account: TAccount; StudentLogin: string);
+var
+  stud: TStudent;
+begin
+  Server.CheckState;
+  AuthorizeAdmin(Account);
+  stud := uDatabase.StudentGet(StudentLogin);
+  if not Assigned(stud) then
+    raise ENotExists.Create(Format('Студент з логіном "%s" не існує.', [StudentLogin]));
+  uDatabase.StudentDel(StudentLogin);
 end;
 
 procedure TServerImpl.StudentEdit(Account: TAccount; Student: TStudent);
+var
+  stud: TStudent;
 begin
-
+  Server.CheckState;
+  AuthorizeAdmin(Account);
+  CheckNoEmpty(Student.Login);
+  CheckNoEmpty(Student.Password);
+  stud := uDatabase.StudentGet(Student.Id);
+  if not Assigned(stud) then
+    raise ENotExists.Create(Format('Студент з Id "%d" не існує.', [Student.Id]));
+  if not SameText(Student.Login, stud.Login) then
+  begin
+    stud := uDatabase.StudentGet(Student.Login);
+    if Assigned(stud) then
+      raise EAlreadyExists.Create(Format('Студент з логіном "%s" вже існує.', [Student.Login]));
+  end;
+  uDatabase.StudentEdit(Student);
 end;
 
 function TServerImpl.StudentGet(Account: TAccount; const Group: string): TStudents;
 begin
-
+  Server.CheckState;
+  AuthorizeTeacher(Account);
+  if Group = '' then
+    Result := uDatabase.StudentGetMany()
+  else
+    Result := uDatabase.StudentGetMany('%', '%', '%', Group);
 end;
 
 function TServerImpl.TeacherAdd(Account: TAccount; Teacher: TTeacher): Integer;
+var
+  teach: TTeacher;
 begin
-
+  Server.CheckState;
+  AuthorizeAdmin(Account);
+  CheckNoEmpty(Teacher.Login);
+  CheckNoEmpty(Teacher.Password);
+  teach := uDatabase.TeacherGet(Teacher.Login);
+  if not Assigned(teach) then
+    uDatabase.TeacherAdd(Teacher)
+  else
+    raise EAlreadyExists.Create(Format('Викладач з логіном "%s" вже існує.', [Teacher.Login]));
 end;
 
-procedure TServerImpl.TeacherDel(Account: TAccount; TeacherLogin: TTeacher);
-begin
 
+procedure TServerImpl.TeacherDel(Account: TAccount; TeacherLogin: string);
+var
+  teach: TTeacher;
+begin
+  Server.CheckState;
+  AuthorizeAdmin(Account);
+  teach := uDatabase.TeacherGet(TeacherLogin);
+  if not Assigned(teach) then
+    raise EAlreadyExists.Create(Format('Викладач з логіном "%s" не існує.', [TeacherLogin]));
+  uDatabase.TeacherDel(TeacherLogin);
 end;
+
 
 procedure TServerImpl.TeacherEdit(Account: TAccount; Teacher: TTeacher);
+var
+  teach: TTeacher;
 begin
-
+  Server.CheckState;
+  AuthorizeAdmin(Account);
+  CheckNoEmpty(Teacher.Login);
+  CheckNoEmpty(Teacher.Password);
+  teach := uDatabase.TeacherGet(Teacher.Id);
+  if not Assigned(teach) then
+    raise EAlreadyExists.Create(Format('Викладач з Id "%d" не існує.', [Teacher.Id]));
+  if not SameText(teach.Login, Teacher.Login) then
+  begin
+    teach := uDatabase.TeacherGet(Teacher.Login);
+    if Assigned(teach) then
+      raise EAlreadyExists.Create(Format('Викладач з логіном "%s" вже існує.', [Teacher.Login]));
+  end;
+  if Teacher.Login = 'admin' then
+    raise ENoAuthorize.Create('Не можна модифікувати дані адміністратора системи.');
+  uDatabase.TeacherEdit(Teacher);
 end;
+
 
 function TServerImpl.TeacherGet(Account: TAccount; const Pulpit, Job: string): TTeachers;
 begin
-
+  Server.CheckState;
+  AuthorizeAdmin(Account);
+  if Pulpit = '' then
+    Result := uDatabase.TeacherGetMany()
+  else
+    Result := uDatabase.TeacherGetMany('%', '%', '%', Pulpit);
 end;
 
 initialization

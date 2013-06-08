@@ -25,18 +25,21 @@ function GroupGetMany(const GroupName: string = '%'): TGroups;
 procedure GroupChange(const GroupId: Integer; Group: TGroup);
 
 procedure StudentAdd(const Student: TStudent);
-function StudentGet(const StudentLogin: string): TStudent;
+function StudentGet(const StudentLogin: string): TStudent; overload;
+function StudentGet(const StudentId: Integer): TStudent; overload;
 function StudentGetMany(const StudentLogin: string = '%'; const StudentName: string = '%'; const StudentSurname: string = '%'; StudentGroup: string = '%')
   : TStudents;
-procedure StudentEdit(const StudentLogin: string; NewStudent: TStudent);
-procedure StudentDel(const StudentLogin: string);
+procedure StudentEdit(Student: TStudent);
+procedure StudentDel(const StudentLogin: string); overload;
+procedure StudentDel(const StudentId: Integer); overload;
 
-function TeacherGet(const TeacherLogin: string): TTeacher;
+function TeacherGet(const TeacherLogin: string): TTeacher; overload;
+function TeacherGet(const TeacherId: Integer): TTeacher; overload;
 function TeacherGetMany(const TeacherLogin: string = '%'; const TeacherName: string = '%'; const TeacherSurname: string = '%'; const Pulpit: string = '%')
   : TTeachers;
 function TeacherAdd(const Teacher: TTeacher): Integer;
 procedure TeacherDel(const TeacherLogin: string);
-procedure TeacherEdit(const TeacherLogin: string; Teacher: TTeacher);
+procedure TeacherEdit(Teacher: TTeacher);
 
 function GetTeacherId(TeacherLogin: string): integer;
 function GetGroupId(const GroupName: string): integer;
@@ -288,6 +291,34 @@ begin
   end;
 end;
 
+function StudentGet(const StudentId: Integer): TStudent;
+var
+  Query: TpFibQuery;
+  Transaction: TpFibTransaction;
+  Database: TpFibDataBase;
+begin
+  ReqConfigure(Database, Transaction, Query);
+  try
+    Transaction.StartTransaction;
+    Query.SQL.Text := 'select * from STUDENTS where ID=:ID';
+    Query.ParamByName('ID').AsInteger := StudentId;
+    Query.ExecQuery;
+    if not Query.Eof then
+    begin
+      Result := TStudent.Create;
+      Result.Id := Query.FldByName['ID'].AsInteger;
+      Result.Login := Query.FldByName['LOGIN'].AsString;
+      Result.Password := Query.FldByName['PASSW'].AsString;
+      Result.Name := Query.FldByName['NAME'].AsString;
+      Result.SurName := Query.FldByName['SURNAME'].AsString;
+    end
+    else
+      Result := nil;
+  finally
+    ReqClear(Database, Transaction, Query);
+  end;
+end;
+
 function StudentGetMany(const StudentLogin: string = '%'; const StudentName: string = '%'; const StudentSurname: string = '%'; StudentGroup: string = '%')
   : TStudents;
 var
@@ -358,36 +389,41 @@ begin
   end;
 end;
 
-procedure StudentEdit(const StudentLogin: string; NewStudent: TStudent);
+procedure StudentDel(const StudentId: Integer);
 var
   Query: TpFibQuery;
   Transaction: TpFibTransaction;
   Database: TpFibDataBase;
-  groupId: Integer;
 begin
   ReqConfigure(Database, Transaction, Query);
   try
-    groupId := - 1;
-    if NewStudent.Group.Name <> '' then
-    begin
-      Transaction.StartTransaction;
-      Query.SQL.Text := 'select ID from GROUPS where NAME=:NAME';
-      Query.ParamByName('NAME').AsString := NewStudent.Group.Name;
-      Query.ExecQuery;
-      if not Query.Eof then
-        groupId := Query.FldByName['ID'].AsInteger;
-      Transaction.Commit;
-    end;
-
     Transaction.StartTransaction;
-    Query.SQL.SetText('update STUDENTS set LOGIN=:NEWLOGIN, PASSW=:PASSW, NAME=:NAME, SURNAME=:SURNAME, ID_GROUP=:GROUPID where LOGIN=:LOGIN');
-    Query.ParamByName('LOGIN').AsString := StudentLogin;
-    Query.ParamByName('NEWLOGIN').AsString := NewStudent.Login;
-    Query.ParamByName('PASSW').AsString := NewStudent.Password;
-    Query.ParamByName('NAME').AsString := NewStudent.Name;
-    Query.ParamByName('SURNAME').AsString := NewStudent.Surname;
-    if groupId >= 0 then
-      Query.ParamByName('GROUPID').AsInteger := groupId
+    Query.SQL.SetText('delete from STUDENTS where ID=:ID');
+    Query.ParamByName('ID').AsInteger := StudentId;
+    Query.ExecQuery;
+    Transaction.Commit;
+  finally
+    ReqClear(Database, Transaction, Query);
+  end;
+end;
+
+
+procedure StudentEdit(Student: TStudent);
+var
+  Query: TpFibQuery;
+  Transaction: TpFibTransaction;
+  Database: TpFibDataBase;
+begin
+  ReqConfigure(Database, Transaction, Query);
+  try
+    Transaction.StartTransaction;
+    Query.SQL.SetText('update STUDENTS set LOGIN=:LOGIN, PASSW=:PASSW, NAME=:NAME, SURNAME=:SURNAME, ID_GROUP=:GROUPID where ID=:ID');
+    Query.ParamByName('LOGIN').AsString := Student.Login;
+    Query.ParamByName('PASSW').AsString := Student.Password;
+    Query.ParamByName('NAME').AsString := Student.Name;
+    Query.ParamByName('SURNAME').AsString := Student.Surname;
+    if Student.Group.Id >= 0 then
+      Query.ParamByName('GROUPID').AsInteger := Student.Group.Id
     else
       Query.ParamByName('GROUPID').IsNull := True;
     Query.ExecQuery;
@@ -414,6 +450,7 @@ begin
     if not Query.Eof then
     begin
       Result := TTeacher.Create;
+      Result.Id := Query.FldByName['ID'].AsInteger;
       Result.Login := Query.FldByName['LOGIN'].AsString;
       Result.Password := Query.FldByName['PASSW'].AsString;
       Result.Name := Query.FldByName['NAME'].AsString;
@@ -428,6 +465,40 @@ begin
     ReqClear(Database, Transaction, Query);
   end;
 end;
+
+function TeacherGet(const TeacherId: Integer): TTeacher;
+var
+  Query: TpFibQuery;
+  Transaction: TpFibTransaction;
+  Database: TpFibDataBase;
+  Info: string;
+begin
+  ReqConfigure(Database, Transaction, Query);
+  try
+    Transaction.StartTransaction;
+    Query.SQL.SetText('select * from TEACHERS where ID=:ID');
+    Query.ParamByName('ID').AsInteger := TeacherId;
+    Query.ExecQuery;
+
+    if not Query.Eof then
+    begin
+      Result := TTeacher.Create;
+      Result.Id := Query.FldByName['ID'].AsInteger;
+      Result.Login := Query.FldByName['LOGIN'].AsString;
+      Result.Password := Query.FldByName['PASSW'].AsString;
+      Result.Name := Query.FldByName['NAME'].AsString;
+      Result.SurName := Query.FldByName['SURNAME'].AsString;
+      Result.Pulpit := Query.FldByName['PULPIT'].AsString;
+      Result.Job := Query.FldByName['JOB'].AsString;
+    end
+    else
+      Result := nil;
+    Transaction.Commit;
+  finally
+    ReqClear(Database, Transaction, Query);
+  end;
+end;
+
 
 function TeacherGetMany(const TeacherLogin: string = '%'; const TeacherName: string = '%'; const TeacherSurname: string = '%'; const Pulpit: string = '%')
   : TTeachers;
@@ -513,7 +584,7 @@ begin
   end;
 end;
 
-procedure TeacherEdit(const TeacherLogin: string; Teacher: TTeacher);
+procedure TeacherEdit(Teacher: TTeacher);
 var
   Query: TpFibQuery;
   Transaction: TpFibTransaction;
@@ -522,8 +593,8 @@ begin
   ReqConfigure(Database, Transaction, Query);
   try
     Transaction.StartTransaction;
-    Query.SQL.SetText('update TEACHERS set LOGIN=:LOGIN, PASSW=:PASSW, NAME=:NAME, SURNAME=:SURNAME, PULPIT=:PULPIT, JOB=:JOB where LOGIN=:OLDLOGIN');
-    Query.ParamByName('OLDLOGIN').AsString := TeacherLogin;
+    Query.SQL.SetText('update TEACHERS set LOGIN=:LOGIN, PASSW=:PASSW, NAME=:NAME, SURNAME=:SURNAME, PULPIT=:PULPIT, JOB=:JOB where ID=:ID');
+    Query.ParamByName('ID').AsInteger := Teacher.Id;
     Query.ParamByName('LOGIN').AsString := Teacher.Login;
     Query.ParamByName('PASSW').AsString := Teacher.Password;
     Query.ParamByName('NAME').AsString := Teacher.Name;

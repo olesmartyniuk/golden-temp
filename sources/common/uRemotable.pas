@@ -170,12 +170,12 @@ type
 
     function TeacherAdd(Account: TAccount; Teacher: TTeacher): Integer; stdcall;
     procedure TeacherEdit(Account: TAccount; Teacher: TTeacher); stdcall;
-    procedure TeacherDel(Account: TAccount; TeacherLogin: TTeacher); stdcall;
+    procedure TeacherDel(Account: TAccount; TeacherLogin: string); stdcall;
     function TeacherGet(Account: TAccount; const Pulpit: string = ''; const Job: string = ''): TTeachers;
 
     function StudenAdd(Account: TAccount; Student: TStudent): Integer; stdcall;
     procedure StudentEdit(Account: TAccount; Student: TStudent);
-    procedure StudentDel(Account: TAccount; StudentId: Integer); stdcall;
+    procedure StudentDel(Account: TAccount; StudentLogin: string); stdcall;
     function StudentGet(Account: TAccount; const Group: string = ''): TStudents; stdcall;
   end;
 
