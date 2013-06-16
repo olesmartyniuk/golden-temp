@@ -16,46 +16,72 @@ type
   TQuestion = class;
 
   TAccount = class(TRemotable)
-    public
-      Id: Integer;
-      Login: string;
-      Password: string;
+    private
+      FId: Integer;
+      FLogin: string;
+      FPassword: string;
+    published
+      property Id: Integer read FId write FId;
+      property Login: string read FLogin write FLogin;
+      property Password: string read FPassword write FPassword;
   end;
 
   TGroup = class(TRemotable)
-    public
-      Id: Integer;
-      Name: string;
-      Description: string;
+    private
+      FName: string;
+      FId: Integer;
+      FDescription: string;
+    published
+      property Id: Integer read FId write FId;
+      property name: string read FName write FName;
+      property Description: string read FDescription write FDescription;
   end;
 
   TGroups = array of TGroup;
 
   TTeacher = class(TRemotable)
-    public
-      Id: Integer;
-      Login: string;
-      Password: string;
-      Name: string;
-      Surname: string;
-      Pulpit: string;
-      Job: string;
+  private
+    FName: string;
+    FJob: string;
+    FSurname: string;
+    FId: Integer;
+    FPulpit: string;
+    FPassword: string;
+    FLogin: string;
+    published
+      property Id: Integer read FId write FId;
+      property Login: string read FLogin write FLogin;
+      property Password: string read FPassword write FPassword;
+      property Name: string read FName write FName;
+      property Surname: string read FSurname write FSurname;
+      property Pulpit: string read FPulpit write FPulpit;
+      property Job: string read FJob write FJob;
   end;
 
   TTeachers = array of TTeacher;
 
   TStudent = class(TRemotable)
-    public
-      Id: Integer;
-      Login: string;
-      Password: string;
-      Name: string;
-      Surname: string;
+    private
+      FName: string;
+      FSurname: string;
+      FId: Integer;
+      FPassword: string;
+      FLogin: string;
+      FGroup: TGroup;
+    published
+      property Id: Integer read FId write FId;
+      property Login: string read FLogin write FLogin;
+      property Password: string read FPassword write FPassword;
+      property Name: string read FName write FName;
+      property Surname: string read FSurname write FSurname;
       /// <clientQualifier>N</clientQualifier>
       /// <supplierQualifier>1</supplierQualifier>
       /// <directed>True</directed>
       /// <label>знаходиться</label>
-      Group: TGroup;
+      property Group: TGroup read FGroup write FGroup;
+    public
+      constructor Create;
+      destructor Destroy; override;
   end;
 
   TStudents = array of TStudent;
@@ -162,7 +188,7 @@ type
   TSessions = array of TSession;
 
   IAdministrator = interface(IInvokable)
-  ['{EE2A67B5-48C1-4A35-80F3-E3D44594C357}']
+    ['{EE2A67B5-48C1-4A35-80F3-E3D44594C357}']
     function GroupAdd(Account: TAccount; Group: TGroup): Integer; stdcall;
     procedure GroupEdit(Account: TAccount; Group: TGroup); stdcall;
     procedure GroupDel(Account: TAccount; const Name: string); stdcall;
@@ -173,14 +199,16 @@ type
     procedure TeacherDel(Account: TAccount; TeacherLogin: string); stdcall;
     function TeacherGet(Account: TAccount; const Pulpit: string = ''; const Job: string = ''): TTeachers;
 
-    function StudenAdd(Account: TAccount; Student: TStudent): Integer; stdcall;
+    function StudentAdd(Account: TAccount; Student: TStudent): Integer; stdcall;
     procedure StudentEdit(Account: TAccount; Student: TStudent);
     procedure StudentDel(Account: TAccount; StudentLogin: string); stdcall;
     function StudentGet(Account: TAccount; const Group: string = ''): TStudents; stdcall;
+
+    procedure PasswordEdit(Account: TAccount; const PasswordNew: string);
   end;
 
   ITeacher = interface(IInvokable)
-  ['{7FC9807B-03BC-4336-8D73-B3006D3AF73F}']
+    ['{7FC9807B-03BC-4336-8D73-B3006D3AF73F}']
     function ResultsGet(Account: TAccount; StudentLogin: string; GroupName: string; TestName: string; StartDateFrom: TDateTime; StartDateTo: TDateTime)
       : TSessions; stdcall;
     procedure TestEdit(Account: TAccount; TestName: string; Test: TTest); stdcall;
@@ -193,7 +221,7 @@ type
   end;
 
   IStudent = interface(IInvokable)
-  ['{4E33B4A4-6105-4632-BF90-74BDFC211163}']
+    ['{4E33B4A4-6105-4632-BF90-74BDFC211163}']
     function TestGetInfo(Account: TAccount; Accessibility: TTest): TTests; stdcall;
     function Sessions_list(Account: TAccount): TSessions; stdcall;
     function TestsGetAvailable(Account: TAccount): TTests; stdcall;
@@ -202,13 +230,7 @@ type
     procedure SendAnswer(Account: TAccount; Session: TSession; ID_q: TQuestion; TextAnswer: string); stdcall;
   end;
 
-  ERemotableError = class(ERemotableException)
-    private
-      FMessage: string;
-    published
-      property message: string read FMessage write FMessage;
-  end;
-
+  ERemotableError = class(ERemotableException);
   ENoAuthorize = class(ERemotableError); // даному акаунту доступ заборонено, або акаунт не існує
   EAlreadyExists = class(ERemotableError); // даний елемент вже існує
   ENotExists = class(ERemotableError); // даний елемент не існує
@@ -217,11 +239,27 @@ type
 
 implementation
 
+{ TStudent }
+
+constructor TStudent.Create;
+begin
+  inherited;
+  Group := TGroup.Create;
+end;
+
+destructor TStudent.Destroy;
+begin
+  Group.Free;
+  inherited;
+end;
+
 initialization
 
 { Invokable interfaces must be registered }
 InvRegistry.RegisterInterface(TypeInfo(IAdministrator));
 
+RemClassRegistry.RegisterXSClass(TAccount);
+RemClassRegistry.RegisterXSInfo(TypeInfo(TAccount));
 RemClassRegistry.RegisterXSClass(TGroup);
 RemClassRegistry.RegisterXSInfo(TypeInfo(TGroups));
 RemClassRegistry.RegisterXSClass(TStudent);
