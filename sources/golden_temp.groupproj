@@ -6,6 +6,9 @@
 			<Projects Include="server\server.dproj">
 				<Dependencies/>
 			</Projects>
+			<Projects Include="admin\administrator.dproj">
+				<Dependencies/>
+			</Projects>
 		</ItemGroup>
 		<ProjectExtensions>
 			<Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -23,14 +26,23 @@
 		<Target Name="server:Make">
 			<MSBuild Projects="server\server.dproj" Targets="Make"/>
 		</Target>
+		<Target Name="administrator">
+			<MSBuild Projects="admin\administrator.dproj"/>
+		</Target>
+		<Target Name="administrator:Clean">
+			<MSBuild Projects="admin\administrator.dproj" Targets="Clean"/>
+		</Target>
+		<Target Name="administrator:Make">
+			<MSBuild Projects="admin\administrator.dproj" Targets="Make"/>
+		</Target>
 		<Target Name="Build">
-			<CallTarget Targets="server"/>
+			<CallTarget Targets="server;administrator"/>
 		</Target>
 		<Target Name="Clean">
-			<CallTarget Targets="server:Clean"/>
+			<CallTarget Targets="server:Clean;administrator:Clean"/>
 		</Target>
 		<Target Name="Make">
-			<CallTarget Targets="server:Make"/>
+			<CallTarget Targets="server:Make;administrator:Make"/>
 		</Target>
 		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')" Project="$(BDS)\Bin\CodeGear.Group.Targets"/>
 	</Project>
