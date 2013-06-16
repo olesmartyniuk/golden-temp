@@ -11,7 +11,8 @@ uses
   uRemotable in '..\common\uRemotable.pas',
   uDatabase in 'uDatabase.pas',
   uConfig in '..\common\uConfig.pas',
-  uServerState in 'uServerState.pas';
+  uServerState in 'uServerState.pas',
+  uDebug in '..\common\uDebug.pas';
 
 {$R *.res}
 
