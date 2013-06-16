@@ -13,9 +13,7 @@ uses
   Vcl.Forms,
   Vcl.Dialogs,
   Vcl.AppEvnts,
-  Vcl.StdCtrls,
-  IdHTTPWebBrokerBridge,
-  Web.HTTPApp;
+  Vcl.StdCtrls;
 
 type
   TMainForm = class(TForm)
@@ -29,9 +27,10 @@ type
     procedure ButtonOpenBrowserClick(Sender: TObject);
     procedure ButtonStopClick(Sender: TObject);
     private
-      FServer: TIdHTTPWebBrokerBridge;
+      //FServer: TIdHTTPWebBrokerBridge;
       procedure StartServer;
       { Private declarations }
+
     public
       { Public declarations }
   end;
