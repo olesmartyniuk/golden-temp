@@ -1,8 +1,8 @@
 object MainForm: TMainForm
   Left = 271
   Top = 114
-  Caption = 'MainForm'
-  ClientHeight = 235
+  Caption = #1057#1077#1088#1074#1077#1088' '#1090#1077#1089#1090#1091#1074#1072#1085#1085#1103
+  ClientHeight = 129
   ClientWidth = 399
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -13,50 +13,36 @@ object MainForm: TMainForm
   OldCreateOrder = False
   PixelsPerInch = 96
   TextHeight = 13
-  object Label1: TLabel
-    Left = 24
-    Top = 48
-    Width = 20
-    Height = 13
-    Caption = 'Port'
-  end
   object ButtonStart: TButton
     Left = 24
     Top = 8
     Width = 75
     Height = 25
-    Caption = 'Start'
+    Caption = #1057#1090#1072#1088#1090
     TabOrder = 0
     OnClick = ButtonStartClick
   end
   object ButtonStop: TButton
-    Left = 105
-    Top = 8
+    Left = 24
+    Top = 48
     Width = 75
     Height = 25
-    Caption = 'Stop'
+    Caption = #1057#1090#1086#1087
     TabOrder = 1
     OnClick = ButtonStopClick
   end
-  object EditPort: TEdit
-    Left = 24
-    Top = 67
-    Width = 121
-    Height = 21
-    TabOrder = 2
-    Text = '3030'
-  end
   object ButtonOpenBrowser: TButton
-    Left = 24
-    Top = 112
-    Width = 107
+    Left = 166
+    Top = 8
+    Width = 225
     Height = 25
-    Caption = 'Open Browser'
-    TabOrder = 3
+    Caption = #1042#1110#1076#1082#1088#1080#1090#1080' '#1110#1085#1090#1077#1088#1092#1077#1089' '#1091' '#1073#1088#1072#1091#1079#1077#1088#1110
+    TabOrder = 2
     OnClick = ButtonOpenBrowserClick
   end
-  object ApplicationEvents1: TApplicationEvents
-    Left = 288
-    Top = 24
+  object ApplicationEvents: TApplicationEvents
+    OnIdle = ApplicationEventsIdle
+    Left = 176
+    Top = 56
   end
 end

@@ -19,20 +19,14 @@ type
   TMainForm = class(TForm)
     ButtonStart: TButton;
     ButtonStop: TButton;
-    EditPort: TEdit;
-    Label1: TLabel;
-    ApplicationEvents1: TApplicationEvents;
+    ApplicationEvents: TApplicationEvents;
     ButtonOpenBrowser: TButton;
     procedure ButtonStartClick(Sender: TObject);
     procedure ButtonOpenBrowserClick(Sender: TObject);
     procedure ButtonStopClick(Sender: TObject);
+    procedure ApplicationEventsIdle(Sender: TObject; var Done: Boolean);
     private
-      //FServer: TIdHTTPWebBrokerBridge;
-      procedure StartServer;
-      { Private declarations }
-
     public
-      { Public declarations }
   end;
 
 var
@@ -46,28 +40,37 @@ uses
   Winapi.ShellApi,
   uServerState;
 
+procedure TMainForm.ApplicationEventsIdle(Sender: TObject; var Done: Boolean);
+begin
+  if Server.State = STATE_STOPED then
+  begin
+    ButtonStart.Enabled := True;
+    ButtonStop.Enabled := False;
+    ButtonOpenBrowser.Enabled := False;
+  end else
+  begin
+    ButtonStart.Enabled := False;
+    ButtonStop.Enabled := True;
+    ButtonOpenBrowser.Enabled := True;
+  end;
+end;
+
 procedure TMainForm.ButtonOpenBrowserClick(Sender: TObject);
 var
   LURL: string;
 begin
-  LURL := Format('http://localhost:%s', [EditPort.Text]);
+  LURL := Format('http://localhost:3030/', []);
   ShellExecute(0, nil, PChar(LURL), nil, nil, SW_SHOWNOACTIVATE);
 end;
 
 procedure TMainForm.ButtonStartClick(Sender: TObject);
 begin
-  Server := TServerStatusImpl.Create;
   Server.State := STATE_STARTED;
 end;
 
 procedure TMainForm.ButtonStopClick(Sender: TObject);
 begin
-  Server := nil;
-end;
-
-procedure TMainForm.StartServer;
-begin
-
+  Server.State := STATE_STOPED;
 end;
 
 end.

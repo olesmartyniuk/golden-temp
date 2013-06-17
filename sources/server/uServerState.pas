@@ -96,4 +96,10 @@ begin
   end;
 end;
 
+initialization
+  Server := TServerStatusImpl.Create;
+
+finalization
+  Server := nil;
+
 end.
