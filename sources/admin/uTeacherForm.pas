@@ -32,8 +32,6 @@ type
     Label3: TLabel;
     Label4: TLabel;
     LabeledEditSurname: TEdit;
-    ImageList: TImageList;
-    ButtonCheckLogin: TImage;
     Label6: TLabel;
     LabeledEditCathedra: TEdit;
     Label7: TLabel;
@@ -46,22 +44,15 @@ type
     procedure LabeledEditLoginChange(Sender: TObject);
     procedure LabeledEditSurnameChange(Sender: TObject);
     procedure LabeledEditLoginKeyPress(Sender: TObject; var Key: Char);
-    procedure ButtonCheckLoginClick(Sender: TObject);
     procedure BitBtnOkClick(Sender: TObject);
     procedure LabeledEditPasswordChange(Sender: TObject);
     private
-      fLoginsChangManualy: Boolean;
+      FLoginsChangManualy: Boolean; // логін змінювався вручну, а не транслітерувався з імені
     private
-      procedure SetLoginState(aState: TLoginState);
       procedure CheckValues;
-      procedure SetPicture(aButton: TImage; aPictureNumber: Integer);
-      function CheckLogin(aLogin: WideString): Boolean;
       function IsDataChanged: Boolean;
     public
-      Host: string;
-      Account: TAccount;
-      TeacherSurname, TeacherName, TeacherLogin, TeacherPassword, TeacherCathedra, TeacherPosition: WideString;
-      NewTeacherSurname, NewTeacherName, NewTeacherLogin, NewTeacherPassword, NewTeacherCathedra, NewTeacherPosition: WideString;
+      Teacher: TTeacher;
   end;
 
 implementation
@@ -76,25 +67,10 @@ uses
 {$R *.dfm}
 { TStudentForm }
 
-function TTeacherForm.CheckLogin(aLogin: WideString): Boolean;
-var
-  splash: ISplash;
-  teachers: TTeachers;
-begin
-  splash := Dialog.NewSplash(Self);
-  splash.ShowSplash(cCheckLoginUnical);
-  try
-    teachers := Remotable.Administrator.TeacherGet(Account, aLogin);
-    Result := Length(teachers) = 0;
-  finally
-    splash.HideSplash;
-  end;
-end;
-
 procedure TTeacherForm.CheckValues;
 var
   ok: boolean;
-  message: WideString;
+  message: string;
 begin
   ok := True;
   if LabeledEditLogin.Text = '' then
@@ -142,9 +118,9 @@ end;
 
 function TTeacherForm.IsDataChanged: Boolean;
 begin
-  if TeacherLogin <> '' then
-    Result := (TeacherLogin <> LabeledEditLogin.Text) or (TeacherName <> LabeledEditName.Text) or (TeacherSurname <> LabeledEditSurname.Text) or
-      (TeacherPassword <> LabeledEditPassword.Text) or (TeacherCathedra <> LabeledEditCathedra.Text) or (TeacherPosition <> ComboBoxPosition.Text)
+  if Teacher.Id <> 0 then
+    Result := (Teacher.Login <> LabeledEditLogin.Text) or (Teacher.Name <> LabeledEditName.Text) or (Teacher.Surname <> LabeledEditSurname.Text) or
+      (Teacher.Password <> LabeledEditPassword.Text) or (Teacher.Pulpit <> LabeledEditCathedra.Text) or (Teacher.Job <> ComboBoxPosition.Text)
   else
     Result := ('' <> LabeledEditLogin.Text) or ('' <> LabeledEditName.Text) or ('' <> LabeledEditSurname.Text) or ('' <> LabeledEditPassword.Text) or
       ('' <> LabeledEditCathedra.Text) or ('' <> ComboBoxPosition.Text);
@@ -152,16 +128,12 @@ end;
 
 procedure TTeacherForm.LabeledEditLoginChange(Sender: TObject);
 begin
-  if Trim(LabeledEditLogin.Text) <> '' then
-    SetLoginState(lsNoChecked)
-  else
-    SetLoginState(lsNo);
   CheckValues;
 end;
 
 procedure TTeacherForm.LabeledEditLoginKeyPress(Sender: TObject; var Key: Char);
 begin
-  fLoginsChangManualy := Trim(LabeledEditLogin.Text) <> '';
+  FLoginsChangManualy := Trim(LabeledEditLogin.Text) <> '';
 end;
 
 procedure TTeacherForm.LabeledEditPasswordChange(Sender: TObject);
@@ -171,7 +143,7 @@ end;
 
 procedure TTeacherForm.LabeledEditSurnameChange(Sender: TObject);
 begin
-  if not fLoginsChangManualy then
+  if not FLoginsChangManualy then
   begin
     LabeledEditLogin.Text := TranslitKir2Lat(LabeledEditSurname.Text);
     if LabeledEditName.Text <> '' then
@@ -179,79 +151,23 @@ begin
   end;
 end;
 
-procedure TTeacherForm.SetLoginState(aState: TLoginState);
-begin
-  case aState of
-    lsNo:
-      begin
-        SetPicture(ButtonCheckLogin, 0);
-        ButtonCheckLogin.Hint := '';
-        ButtonCheckLogin.Enabled := False;
-      end;
-    lsNoChecked:
-      begin
-        SetPicture(ButtonCheckLogin, 1);
-        ButtonCheckLogin.Hint := cCheckLoginAvailable;
-        ButtonCheckLogin.Enabled := True;
-      end;
-    lsOK:
-      begin
-        SetPicture(ButtonCheckLogin, 2);
-        ButtonCheckLogin.Hint := cLoginUnical;
-        ButtonCheckLogin.Enabled := False;
-      end;
-    lsFail:
-      begin
-        SetPicture(ButtonCheckLogin, 3);
-        ButtonCheckLogin.Hint := cTeacherAlreadyExists;
-        ButtonCheckLogin.Enabled := False;
-      end;
-  end;
-end;
-
-procedure TTeacherForm.SetPicture(aButton: TImage; aPictureNumber: Integer);
-var
-  btm: TBitmap;
-begin
-  btm := TBitmap.Create;
-  try
-    ImageList.GetBitmap(aPictureNumber, btm);
-    btm.TransparentColor := clWhite;
-    aButton.Picture.Bitmap := btm;
-    aButton.Transparent := True;
-  finally
-    btm.Free;
-  end;
-end;
-
 procedure TTeacherForm.FormShow(Sender: TObject);
 begin
-  LabeledEditLogin.Text := TeacherLogin;
-  if TeacherLogin <> '' then
-  begin
-    SetLoginState(lsOK);
-    fLoginsChangManualy := True;
-  end
-  else
-  begin
-    SetLoginState(lsNo);
-    fLoginsChangManualy := False;
-  end;
-  LabeledEditPassword.Text := TeacherPassword;
-  LabeledEditName.Text := TeacherName;
-  LabeledEditSurname.Text := TeacherSurname;
-  LabeledEditCathedra.Text := TeacherCathedra;
-  if TeacherPosition = '' then
+  LabeledEditLogin.Text := Teacher.Login;
+  LabeledEditPassword.Text := Teacher.Password;
+  LabeledEditName.Text := Teacher.Name;
+  LabeledEditSurname.Text := Teacher.Surname;
+  LabeledEditCathedra.Text := Teacher.Pulpit;
+  if Teacher.Job = '' then
     ComboBoxPosition.ItemIndex := 0
   else
-    ComboBoxPosition.ItemIndex := ComboBoxPosition.Items.IndexOf(TeacherPosition);
+    ComboBoxPosition.ItemIndex := ComboBoxPosition.Items.IndexOf(Teacher.Job);
   CheckValues;
 end;
 
 procedure TTeacherForm.BitBtnOkClick(Sender: TObject);
 var
   splash: ISplash;
-  teacher: TTeacher;
 begin
   if not IsDataChanged then
   begin
@@ -260,25 +176,24 @@ begin
   end;
   splash := Dialog.NewSplash(Self);
   try
-    teacher := TTeacher.Create;
-    teacher.Login := LabeledEditLogin.Text;
-    teacher.Password := LabeledEditPassword.Text;
-    teacher.name := LabeledEditName.Text;
-    teacher.Surname := LabeledEditSurname.Text;
-    teacher.Pulpit := LabeledEditCathedra.Text;
+    Teacher.Login := LabeledEditLogin.Text;
+    Teacher.Password := LabeledEditPassword.Text;
+    Teacher.Name := LabeledEditName.Text;
+    Teacher.Surname := LabeledEditSurname.Text;
+    Teacher.Pulpit := LabeledEditCathedra.Text;
     if ComboBoxPosition.ItemIndex <> 0 then
-      teacher.Job := ComboBoxPosition.Text;
+      Teacher.Job := ComboBoxPosition.Text;
     try
-    if TeacherLogin = '' then
-    begin
-      splash.ShowSplash(cAddTeacher);
-      Remotable.Administrator.TeacherAdd(Account, teacher);
-    end
-    else
-    begin
-      splash.ShowSplash(cEditTeacher);
-      Remotable.Administrator.TeacherEdit(Account, teacher);
-    end;
+      if Teacher.Id = 0 then
+      begin
+        splash.ShowSplash(cAddTeacher);
+        Teacher.Id := Remotable.Administrator.TeacherAdd(Remotable.Account, Teacher);
+      end
+      else
+      begin
+        splash.ShowSplash(cEditTeacher);
+        Remotable.Administrator.TeacherEdit(Remotable.Account, Teacher);
+      end;
     except
       on E: ERemotableError do
       begin
@@ -287,24 +202,10 @@ begin
         Exit;
       end;
     end;
-    NewTeacherLogin := LabeledEditLogin.Text;
-    NewTeacherPassword := LabeledEditPassword.Text;
-    NewTeacherName := LabeledEditName.Text;
-    NewTeacherSurname := LabeledEditSurname.Text;
-    NewTeacherCathedra := LabeledEditCathedra.Text;
-    NewTeacherPosition := ComboBoxPosition.Text;
   finally
     splash.HideSplash;
   end;
   ModalResult := mrOk;
-end;
-
-procedure TTeacherForm.ButtonCheckLoginClick(Sender: TObject);
-begin
-  if CheckLogin(LabeledEditLogin.Text) then
-    SetLoginState(lsOK)
-  else
-    SetLoginState(lsFail);
 end;
 
 end.

@@ -40,15 +40,6 @@ object GroupForm: TGroupForm
       Height = 13
       Caption = #1053#1072#1079#1074#1072
     end
-    object ButtonCheckLogin: TImage
-      Left = 327
-      Top = 35
-      Width = 20
-      Height = 20
-      Cursor = crHandPoint
-      Transparent = True
-      OnClick = ButtonCheckLoginClick
-    end
     object Label5: TLabel
       Left = 176
       Top = 157
@@ -67,7 +58,7 @@ object GroupForm: TGroupForm
     object LabeledEditName: TEdit
       Left = 16
       Top = 34
-      Width = 305
+      Width = 329
       Height = 21
       TabOrder = 0
       OnChange = LabeledEditNameChange
@@ -138,7 +129,7 @@ object GroupForm: TGroupForm
     Left = 48
     Top = 240
     Bitmap = {
-      494C010104000600280010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C0101040006002C0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

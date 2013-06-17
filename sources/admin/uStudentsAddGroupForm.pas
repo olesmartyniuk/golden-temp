@@ -43,9 +43,8 @@ type
     private
       procedure PrintStudentsList;
     public
-      Host, Login, Password: WideString;
       StudentsList: TList<TStudent>;
-      Group: WideString;
+      Group: string;
       Groups: TList<TGroup>;
   end;
 
@@ -66,9 +65,6 @@ var
 begin
   form := TStudentForm.Create(Self);
   try
-    form.Host := Host;
-    form.Login := Login;
-    form.Password := Password;
     for i := 0 to Groups.Count - 1 do
       form.Groups.Add(Groups.Items[i].name);
     form.ComboBoxGroups.Enabled := False;
@@ -104,7 +100,7 @@ begin
           Continue;
         student := StudentsList.Items[Integer(ListView.Items[i].Data)];
         student.Group.Name := Group;
-        Remotable.Administrator.StudentEdit(AdministratorMainForm.Account, student);
+        Remotable.Administrator.StudentEdit(Remotable.Account, student);
         ModalResult := mrOk;
       end;
     except

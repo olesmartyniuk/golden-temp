@@ -21,16 +21,18 @@ type
     private
       class var FHost: string;
       class var FAdministrator: IAdministrator;
+      class var FAccount: TAccount;
     private
       class function GetHost: string; static;
       class procedure SetHost(const Value: string); static;
 
+      class function GetAccount: TAccount; static;
       class function GetAdministrator: IAdministrator; static;
       class procedure SetAdministrator(const Value: IAdministrator); static;
-
     public
       class property Administrator: IAdministrator read GetAdministrator write SetAdministrator;
       class property Host: string read GetHost write SetHost;
+      class property Account: TAccount read GetAccount;
   end;
 
   Dialog = class
@@ -58,6 +60,13 @@ begin
 end;
 
 { Remotable }
+
+class function Remotable.GetAccount: TAccount;
+begin
+  if not Assigned(FAccount) then
+    FAccount := TAccount.Create;
+  Result := FAccount;
+end;
 
 class function Remotable.GetAdministrator: IAdministrator;
 var
