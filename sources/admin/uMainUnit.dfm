@@ -35,10 +35,6 @@ object AdministratorMainForm: TAdministratorMainForm
     object TabSheeTeachers: TTabSheet
       Caption = #1042#1080#1082#1083#1072#1076#1072#1095#1110
       ImageIndex = 4
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ListViewTeachers: TListView
         Left = 0
         Top = 26
@@ -117,10 +113,6 @@ object AdministratorMainForm: TAdministratorMainForm
     object TabSheetStudents: TTabSheet
       Caption = #1057#1090#1091#1076#1077#1085#1090#1080
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ListViewStudents: TListView
         Tag = 2
         Left = 0
@@ -194,10 +186,6 @@ object AdministratorMainForm: TAdministratorMainForm
     end
     object TabSheetGroups: TTabSheet
       Caption = #1043#1088#1091#1087#1080
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Splitter: TSplitter
         Left = 410
         Top = 26
@@ -358,9 +346,10 @@ object AdministratorMainForm: TAdministratorMainForm
       Left = 4
       Top = 2
       Width = 3
-      Height = 13
+      Height = 14
       Margins.Top = 1
       Align = alLeft
+      ExplicitHeight = 13
     end
     object ImageServerStatus: TImage
       Left = 740
@@ -377,12 +366,13 @@ object AdministratorMainForm: TAdministratorMainForm
       Left = 763
       Top = 2
       Width = 3
-      Height = 13
+      Height = 14
       Cursor = crHandPoint
       Margins.Left = 2
       Margins.Top = 1
       Margins.Right = 5
       Align = alRight
+      ExplicitHeight = 13
     end
   end
   object ImageList: TImageList
@@ -392,7 +382,7 @@ object AdministratorMainForm: TAdministratorMainForm
     Left = 312
     Top = 8
     Bitmap = {
-      494C01010C000E004C0014001400FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C01010C000E00500014001400FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000500000005000000001002000000000000064
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

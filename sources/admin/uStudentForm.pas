@@ -50,7 +50,6 @@ type
       procedure CheckValues;
       function IsDataChanged: Boolean;
     public
-      Host, Login, Password: string;
       Student: TStudent;
       Groups: TStringList;
     public
@@ -73,7 +72,7 @@ uses
 procedure TStudentForm.CheckValues;
 var
   ok: boolean;
-  error: WideString;
+  error: string;
 begin
   ok := True;
 
@@ -213,9 +212,9 @@ begin
         Student.Group.Name := ComboBoxGroups.Text;
 
       if Student.Id = 0 then
-        Remotable.Administrator.StudentAdd(AdministratorMainForm.Account, student)
+        Student.Id := Remotable.Administrator.StudentAdd(Remotable.Account, Student)
       else
-        Remotable.Administrator.StudentEdit(AdministratorMainForm.Account, student)
+        Remotable.Administrator.StudentEdit(Remotable.Account, Student)
     finally
       splash.HideSplash;
     end;

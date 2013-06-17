@@ -15,6 +15,7 @@ object AccountForm: TAccountForm
   Font.Style = []
   OldCreateOrder = False
   Position = poMainFormCenter
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object PanelMain: TPanel
@@ -49,23 +50,6 @@ object AccountForm: TAccountForm
       Width = 41
       Height = 13
       Caption = #1055#1072#1088#1086#1083#1100':'
-    end
-    object Label5: TLabel
-      Left = 271
-      Top = 162
-      Width = 77
-      Height = 13
-      Cursor = crHandPoint
-      Caption = #1047#1084#1110#1085#1080#1090#1080' '#1087#1072#1088#1086#1083#1100
-      Color = clBtnFace
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clHighlight
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsUnderline]
-      ParentColor = False
-      ParentFont = False
-      OnClick = Label5Click
     end
     object EditHost: TEdit
       Left = 74

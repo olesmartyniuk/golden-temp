@@ -159,7 +159,6 @@ type
     procedure ActionLoginExecute(Sender: TObject);
     procedure ActionLogoutExecute(Sender: TObject);
     private
-      FAccount: TAccount;
       FSplash: ISplash;
       FStudents: TList<TStudent>;
       FGroups: TList<TGroup>;
@@ -169,30 +168,28 @@ type
       FLogined: Boolean;
     private
       procedure ChangeState;
-      procedure ShowSplash(const aMessage: WideString);
+      procedure ShowSplash(const aMessage: string);
       procedure HideSplash;
       function Splash: ISplash;
       function GetSelectedStudent: TStudent;
       function GetSelectedGroup: TGroup;
       function GetSelectedTeacher: TTeacher;
 
-      function DelGroup(aName: WideString): Boolean;
-      function DelStudent(aLogin: WideString): Boolean;
-      function DelTeacher(aLogin: WideString): Boolean;
+      function DelGroup(aName: string): Boolean;
+      function DelStudent(aLogin: string): Boolean;
+      function DelTeacher(aLogin: string): Boolean;
 
       procedure GetAll;
       procedure GetGroupsList;
       procedure GetStudentsList;
       procedure GetTeachersList;
       procedure PrintStudents;
-      procedure PrintStudentOfGroup(aGroup: WideString);
+      procedure PrintStudentOfGroup(aGroup: string);
       procedure PrintGroups;
       procedure PrintTeachers;
       procedure PrintOnImage(aNumber: Integer);
 
       function Login: Boolean;
-    public
-      function Account: TAccount;
   end;
 
 var
@@ -208,13 +205,12 @@ uses
   uTeacherForm,
   uStudentsAddGroupForm,
   uChangePasswordForm,
+  uAccountForm,
   uUtils,
   uFactories,
-  uTexts,
+  uTexts;
   // uExport,
-  // uDialogs,
-  uSplashImpl,
-  uAccountForm;
+  // uDialogs;
 
 const
   cMessWaitForAnswer = 'Очікування відповіді від %s...';
@@ -233,9 +229,8 @@ var
 begin
   form := TGroupForm.Create(Self);
   try
-    form.Host := Remotable.Host;
-    form.Account := Account;
-    form.Group := TGroup.Create;
+    group := TGroup.Create;
+    form.Group := group;
     if form.ShowModal = mrOk then
     begin
       FGroups.Add(group);
@@ -270,7 +265,7 @@ procedure TAdministratorMainForm.ActionGroupEditExecute(Sender: TObject);
 var
   form: TGroupForm;
   group: TGroup;
-  oldName: WideString;
+  oldName: string;
   i: Integer;
 begin
   group := GetSelectedGroup;
@@ -278,15 +273,13 @@ begin
     Exit;
   form := TGroupForm.Create(Self);
   try
-    form.Host := Remotable.Host;
-    form.Account := Account;
     form.Group := group;
     oldName := group.Name;
     if form.ShowModal = mrOk then
     begin
-      for i := 0 to fStudents.Count - 1 do
-        if SameText(fStudents.Items[i].Group.Name, oldName) then
-          fStudents.Items[i].Group.Name := group.Name;
+      for i := 0 to FStudents.Count - 1 do
+        if SameText(FStudents.Items[i].Group.Name, oldName) then
+          FStudents.Items[i].Group.Name := group.Name;
       PrintStudents;
       PrintGroups;
     end;
@@ -311,9 +304,6 @@ begin
     Exit;
   form := TStudentForm.Create(Self);
   try
-    form.Host := Remotable.Host;
-    form.Login := Account.Login;
-    form.Password := Account.Password;
     form.Student := student;
     for i := 0 to fGroups.Count - 1 do
       form.Groups.Add(fGroups.Items[i].Name);
@@ -336,18 +326,11 @@ var
 begin
   form := TTeacherForm.Create(Self);
   try
-    form.Host := Remotable.Host;
-    form.Account := Account;
+    teacher := TTeacher.Create;
+    form.Teacher := teacher;
     if form.ShowModal = mrOk then
     begin
-      teacher := TTeacher.Create;
-      teacher.Login := form.NewTeacherLogin;
-      teacher.Password := form.NewTeacherPassword;
-      teacher.Name := form.NewTeacherName;
-      teacher.Surname := form.NewTeacherSurname;
-      teacher.Pulpit := form.NewTeacherCathedra;
-      teacher.Job := form.NewTeacherPosition;
-      fTeachers.Add(teacher);
+      FTeachers.Add(teacher);
       PrintTeachers;
     end;
   finally
@@ -380,24 +363,9 @@ begin
     Exit;
   form := TTeacherForm.Create(Self);
   try
-    form.Host := Remotable.Host;
-    form.Account := Account;
-    form.TeacherLogin := teacher.Login;
-    form.TeacherPassword := teacher.Password;
-    form.TeacherName := teacher.Name;
-    form.TeacherSurname := teacher.Surname;
-    form.TeacherCathedra := teacher.Pulpit;
-    form.TeacherPosition := teacher.Job;
+    form.Teacher := teacher;
     if form.ShowModal = mrOk then
-    begin
-      teacher.Login := form.NewTeacherLogin;
-      teacher.Password := form.NewTeacherPassword;
-      teacher.Name := form.NewTeacherName;
-      teacher.Surname := form.NewTeacherSurname;
-      teacher.Pulpit := form.NewTeacherCathedra;
-      teacher.Job := form.NewTeacherPosition;
       PrintTeachers;
-    end;
   finally
     form.Free;
   end;
@@ -422,9 +390,6 @@ var
 begin
   form := TStudentForm.Create(Self);
   try
-    form.Host := Remotable.Host;
-    form.Login := Account.Login;
-    form.Password := Account.Password;
     student := TStudent.Create;
     for i := 0 to fGroups.Count - 1 do
       form.Groups.Add(fGroups.Items[i].Name);
@@ -445,17 +410,15 @@ var
   group: TGroup;
   studentCount: Integer;
 begin
+  // TODO
   group := GetSelectedGroup;
   if not Assigned(group) then
     Exit;
   form := TFormAddStudent.Create(Self);
-  form.Host := Remotable.Host;
-  form.Login := Account.Login;
-  form.Password := Account.Password;
   form.Group := group.Name;
   form.Groups := FGroups;
-  form.StudentsList := fStudents;
-  studentCount := fStudents.Count;
+  form.StudentsList := FStudents;
+  studentCount := FStudents.Count;
   if (form.ShowModal = mrOK) or (studentCount < fStudents.Count) then
   begin
     PrintStudents;
@@ -463,13 +426,6 @@ begin
   end;
   form.StudentsList := nil;
   form.Free;
-end;
-
-function TAdministratorMainForm.Account: TAccount;
-begin
-  if not Assigned(FAccount) then
-    raise Exception.Create('Необхідно виконати вхід на сервер.');
-  Result := FAccount;
 end;
 
 procedure TAdministratorMainForm.ActionLoginExecute(Sender: TObject);
@@ -497,7 +453,7 @@ begin
     ShowErrorMessage(E.Message, Self);
 end;
 
-procedure TAdministratorMainForm.ShowSplash(const aMessage: WideString);
+procedure TAdministratorMainForm.ShowSplash(const aMessage: string);
 begin
   fGuiBlocked := True;
   ChangeState;
@@ -508,7 +464,7 @@ end;
 procedure TAdministratorMainForm.ActionChangePasswordExecute(Sender: TObject);
 var
   form: TPasswordForm;
-  newPassword, oldPassword: WideString;
+  newPassword, oldPassword: string;
 begin
   form := TPasswordForm.Create(Self);
   if form.ShowModal = mrCancel then
@@ -519,11 +475,11 @@ begin
 
   ShowSplash(cPasswordChange);
   try
-    Remotable.Administrator.PasswordEdit(Account, newPassword);
+    Remotable.Administrator.PasswordEdit(Remotable.Account, newPassword);
   finally
     HideSplash;
   end;
-  Account.Password := newPassword;
+  Remotable.Account.Password := newPassword;
   ShowInfoMessage(cPasswordChangeConfirm, Self);
 end;
 
@@ -571,36 +527,36 @@ begin
   MenuLogout.Visible := FLogined;
 end;
 
-function TAdministratorMainForm.DelGroup(aName: WideString): Boolean;
+function TAdministratorMainForm.DelGroup(aName: string): Boolean;
 begin
   Result := False;
   try
     ShowSplash(cDeletingGroup);
-    Remotable.Administrator.GroupDel(Account, AName);
+    Remotable.Administrator.GroupDel(Remotable.Account, AName);
     Result := True;
   finally
     HideSplash;
   end;
 end;
 
-function TAdministratorMainForm.DelStudent(aLogin: WideString): Boolean;
+function TAdministratorMainForm.DelStudent(aLogin: string): Boolean;
 begin
   Result := False;
   try
     ShowSplash(cDeletingStudent);
-    Remotable.Administrator.StudentDel(Account, ALogin);
+    Remotable.Administrator.StudentDel(Remotable.Account, ALogin);
     Result := True;
   finally
     HideSplash;
   end;
 end;
 
-function TAdministratorMainForm.DelTeacher(aLogin: WideString): Boolean;
+function TAdministratorMainForm.DelTeacher(aLogin: string): Boolean;
 begin
   Result := False;
   try
     ShowSplash(cDeletingTeacher);
-    Remotable.Administrator.TeacherDel(Account, ALogin);
+    Remotable.Administrator.TeacherDel(Remotable.Account, ALogin);
     Result := True;
   finally
     HideSplash;
@@ -651,7 +607,7 @@ var
   groupArr: TGroups;
   i: Integer;
 begin
-  groupArr := Remotable.Administrator.GroupGet(Account);
+  groupArr := Remotable.Administrator.GroupGet(Remotable.Account);
   FGroups.Clear;
   for i := low(groupArr) to high(groupArr) do
     FGroups.Add(groupArr[i]);
@@ -686,13 +642,9 @@ procedure TAdministratorMainForm.GetStudentsList;
 var
   students: TStudents;
   i: Integer;
-  adm: IAdministrator;
-  acc: TAccount;
 begin
   // отримання списку студентів
-  adm := Remotable.Administrator;
-  acc := Account;
-  students := adm.StudentGet(acc);
+  students := Remotable.Administrator.StudentGet(Remotable.Account);
   FStudents.Clear;
   for i := low(students) to high(students) do
     FStudents.Add(students[i]);
@@ -705,7 +657,7 @@ var
   i: Integer;
 begin
   // отримання списку викладчів
-  teachers := Remotable.Administrator.TeacherGet(Account);
+  teachers := Remotable.Administrator.TeacherGet(Remotable.Account);
   FTeachers.Clear;
   for i := low(teachers) to high(teachers) do
     FTeachers.Add(teachers[i]);
@@ -940,30 +892,25 @@ var
   form: TAccountForm;
 begin
   Result := False;
-  FreeAndNil(FAccount);
-
-  FAccount := TAccount.Create;
-  FAccount.Login := 'admin';
-  FAccount.Password := FSettings.GetStr('password', '');
+  Remotable.Account.Login := 'admin';
+  Remotable.Account.Password := FSettings.GetStr('password', '');
 
   form := TAccountForm.Create(Self);
   try
     form.HelpContext := 3010;
-    form.EditHost.Text := Remotable.Host;
-    form.Account := FAccount;
     form.EditLogin.Enabled := False;
     form.CheckBoxSavePassword.Checked := FSettings.GetBool('savepassword', False);
     if form.ShowModal <> mrOk then
       Exit;
     Remotable.Host := form.EditHost.Text;
-    FAccount.Login := form.EditLogin.Text;
-    FAccount.Password := form.EditPassword.Text;
+    Remotable.Account.Login := form.EditLogin.Text;
+    Remotable.Account.Password := form.EditPassword.Text;
 
     FSettings.SetBool('savepassword', form.CheckBoxSavePassword.Checked);
     FSettings.SetStr('host', Remotable.Host);
-    FSettings.SetStr('login', FAccount.Login);
+    FSettings.SetStr('login', Remotable.Account.Login);
     if FSettings.GetBool('savepassword', False) then
-      FSettings.SetStr('password', FAccount.Password)
+      FSettings.SetStr('password', Remotable.Account.Password)
     else
       FSettings.SetStr('password', '');
 
@@ -971,7 +918,7 @@ begin
     splash.ShowSplash(Format(cMessWaitForAnswer, [Remotable.Host]));
     try
       try
-        Remotable.Administrator.TeacherGet(FAccount);
+        Remotable.Administrator.TeacherGet(Remotable.Account);
         Result := True;
       finally
         splash.HideSplash;
@@ -1026,7 +973,7 @@ begin
   end;
 end;
 
-procedure TAdministratorMainForm.PrintStudentOfGroup(aGroup: WideString);
+procedure TAdministratorMainForm.PrintStudentOfGroup(aGroup: string);
 var
   student: TStudent;
   i: Integer;
@@ -1129,7 +1076,7 @@ begin
   ShowSplash(cDeletingStudFromGroup);
   try
     student.Group.Name := '';
-    Remotable.Administrator.StudentEdit(Account, student);
+    Remotable.Administrator.StudentEdit(Remotable.Account, student);
     PrintStudents;
     PrintStudentOfGroup(group.Name);
   finally
@@ -1156,7 +1103,6 @@ begin
   FStudents.Clear;
   FGroups.Clear;
   FTeachers.Clear;
-  FreeAndNil(FAccount);
   FStudents := nil;
   FGroups := nil;
   FTeachers := nil;

@@ -83,7 +83,10 @@ begin
     grp := uDatabase.GroupGet(db, Group.Name);
     try
       if not Assigned(grp) then
-        uDatabase.GroupAdd(db, Group)
+      begin
+        uDatabase.GroupAdd(db, Group);
+        Result := Group.Id;
+      end
       else
         raise EAlreadyExists.Create(Format('Група з іменем "%s" вже існує.', [Group.Name]));
     finally
@@ -182,6 +185,7 @@ begin
         raise ENotExists.Create(Format('Група з іменем "%s" не існує.', [Student.Group.Name]));
     end;
     uDatabase.StudentAdd(db, Student);
+    Result := Student.Id;
   finally
     DatabaseClose(db);
   end;
@@ -265,7 +269,10 @@ begin
     CheckNoEmpty(Teacher.Password);
     teach := uDatabase.TeacherGet(db, Teacher.Login);
     if not Assigned(teach) then
-      uDatabase.TeacherAdd(db, Teacher)
+    begin
+      uDatabase.TeacherAdd(db, Teacher);
+      Result := Teacher.Id;
+    end
     else
       raise EAlreadyExists.Create(Format('Викладач з логіном "%s" вже існує.', [Teacher.Login]));
   finally
