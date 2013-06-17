@@ -39,7 +39,6 @@ function SecToTime(Seconds: integer): TTime;
 
 procedure ShowInfoMessage(const aMessage: WideString; aForm: TForm = nil);
 procedure ShowErrorMessage(const aMessage: WideString; aForm: TForm = nil);
-procedure ShowWarningMessage(const aMessage: WideString; aForm: TForm = nil);
 function QueryYesNo(const aMessage: WideString; aForm: TForm = nil; const aCaption: WideString = 'Info'): integer;
 function QueryYesNoCancel(const aMessage: WideString; aForm: TForm = nil; const aCaption: WideString = 'Info'): integer;
 
@@ -194,17 +193,6 @@ begin
   else
     handle := Application.MainFormHandle;
   MessageBoxW(handle, PWideChar(aMessage), 'Error', MB_OK or MB_ICONERROR)
-end;
-
-procedure ShowWarningMessage(const aMessage: WideString; aForm: TForm = nil);
-var
-  handle: THandle;
-begin
-  if Assigned(aForm) then
-    handle := aForm.Handle
-  else
-    handle := Application.MainFormHandle;
-  MessageBoxW(handle, PWideChar(aMessage), 'Warning', MB_OK or MB_ICONWARNING)
 end;
 
 function QueryYesNo(const aMessage: WideString; aForm: TForm = nil; const aCaption: WideString = 'Info'): integer;

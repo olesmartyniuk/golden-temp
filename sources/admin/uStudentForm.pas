@@ -193,6 +193,7 @@ end;
 procedure TStudentForm.BitBtnOkClick(Sender: TObject);
 var
   splash: ISplash;
+  stud: TStudent;
 begin
   if not IsDataChanged then
   begin
@@ -200,28 +201,33 @@ begin
     Exit;
   end;
 
-  splash := Dialog.NewSplash(Self);
-  splash.ShowSplash(cAddStudent);
   try
-    try
-      Student.Login := LabeledEditLogin.Text;;
-      Student.Password := LabeledEditPassword.Text;
-      Student.Name := LabeledEditName.Text;
-      Student.Surname := LabeledEditSurname.Text;
-      if ComboBoxGroups.ItemIndex <> 0 then
-        Student.Group.Name := ComboBoxGroups.Text;
+    stud := TStudent.Create;
+    stud.CopyFrom(Student);
+    stud.Login := LabeledEditLogin.Text;;
+    stud.Password := LabeledEditPassword.Text;
+    stud.Name := LabeledEditName.Text;
+    stud.Surname := LabeledEditSurname.Text;
 
-      if Student.Id = 0 then
-        Student.Id := Remotable.Administrator.StudentAdd(Remotable.Account, Student)
+    if ComboBoxGroups.ItemIndex <> 0 then
+      stud.Group.Name := ComboBoxGroups.Text;
+
+    splash := Dialog.NewSplash(Self);
+    splash.ShowSplash(cAddStudent);
+    try
+      if stud.Id = 0 then
+        stud.Id := Remotable.Administrator.StudentAdd(Remotable.Account, stud)
       else
-        Remotable.Administrator.StudentEdit(Remotable.Account, Student)
+        Remotable.Administrator.StudentEdit(Remotable.Account, stud);
+      Student.CopyFrom(stud);
+      stud.Free;
     finally
       splash.HideSplash;
     end;
   except
     on E: ERemotableError do
     begin
-      ShowWarningMessage(E.Message, Self);
+      Dialog.ShowWarningMessage(E.Message, Self);
       ModalResult := mrNone;
       Exit;
     end

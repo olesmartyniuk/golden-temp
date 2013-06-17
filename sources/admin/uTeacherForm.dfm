@@ -26,7 +26,6 @@ object TeacherForm: TTeacherForm
     Height = 222
     Align = alClient
     TabOrder = 0
-    ExplicitLeft = 8
     object Label1: TLabel
       Left = 16
       Top = 107

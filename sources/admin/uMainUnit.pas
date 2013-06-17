@@ -209,8 +209,8 @@ uses
   uUtils,
   uFactories,
   uTexts;
-  // uExport,
-  // uDialogs;
+// uExport,
+// uDialogs;
 
 const
   cMessWaitForAnswer = 'Очікування відповіді від %s...';
@@ -410,22 +410,23 @@ var
   group: TGroup;
   studentCount: Integer;
 begin
-  // TODO
   group := GetSelectedGroup;
   if not Assigned(group) then
     Exit;
   form := TFormAddStudent.Create(Self);
-  form.Group := group.Name;
-  form.Groups := FGroups;
-  form.StudentsList := FStudents;
-  studentCount := FStudents.Count;
-  if (form.ShowModal = mrOK) or (studentCount < fStudents.Count) then
-  begin
-    PrintStudents;
-    PrintStudentOfGroup(group.Name);
+  try
+    form.Group := group.Name;
+    form.Groups := FGroups;
+    form.StudentsList := FStudents;
+    if form.ShowModal = mrOK then
+    begin
+      PrintStudents;
+      PrintStudentOfGroup(group.Name);
+    end;
+    form.StudentsList := nil;
+  finally
+    form.Free;
   end;
-  form.StudentsList := nil;
-  form.Free;
 end;
 
 procedure TAdministratorMainForm.ActionLoginExecute(Sender: TObject);
@@ -623,11 +624,22 @@ begin
 end;
 
 function TAdministratorMainForm.GetSelectedStudent: TStudent;
+var
+  id: Integer;
 begin
-  Result := nil;
-  if not Assigned(ListViewStudents.Selected) then
-    Exit;
-  Result := FStudents.Items[Integer(ListViewStudents.Selected.Data)];
+  id := - 1;
+  case PageControl.ActivePageIndex of
+    1:
+      if Assigned(ListViewStudents.Selected) then
+        id := Integer(ListViewStudents.Selected.Data);
+    2:
+      if Assigned(ListViewStudentsByGroups.Selected) then
+        id := Integer(ListViewStudentsByGroups.Selected.Data);
+  end;
+  if id > 0 then
+    Result := FStudents.Items[id]
+  else
+    Result := nil;
 end;
 
 function TAdministratorMainForm.GetSelectedTeacher: TTeacher;
@@ -656,7 +668,7 @@ var
   teachers: TTeachers;
   i: Integer;
 begin
-  // отримання списку викладчів
+  // отримання списку викладачів
   teachers := Remotable.Administrator.TeacherGet(Remotable.Account);
   FTeachers.Clear;
   for i := low(teachers) to high(teachers) do
@@ -925,7 +937,7 @@ begin
       end;
     except
       on E: ERemotableError do
-        ShowWarningMessage(E.Message, Self);
+        Dialog.ShowWarningMessage(E.Message, Self);
     end;
   finally
     form.Free;
@@ -982,7 +994,7 @@ begin
   for i := 0 to FStudents.Count - 1 do
   begin
     student := FStudents.Items[i];
-    if not WideSameText(student.Group.Name, aGroup) then
+    if not SameText(student.Group.Name, aGroup) then
       Continue;
     with ListViewStudentsByGroups.Items.Add do
     begin
@@ -1069,9 +1081,8 @@ var
   group: TGroup;
 begin
   group := GetSelectedGroup;
-  if Assigned(group) then
-    student := GetSelectedStudent
-  else
+  student := GetSelectedStudent;
+  if not (Assigned(group) and Assigned(student)) then
     Exit;
   ShowSplash(cDeletingStudFromGroup);
   try

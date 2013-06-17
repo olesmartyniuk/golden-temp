@@ -35,27 +35,31 @@ type
       property Id: Integer read FId write FId;
       property name: string read FName write FName;
       property Description: string read FDescription write FDescription;
+    public
+      procedure CopyFrom(const Group: TGroup);
   end;
 
   TGroups = array of TGroup;
 
   TTeacher = class(TRemotable)
-  private
-    FName: string;
-    FJob: string;
-    FSurname: string;
-    FId: Integer;
-    FPulpit: string;
-    FPassword: string;
-    FLogin: string;
+    private
+      FName: string;
+      FJob: string;
+      FSurname: string;
+      FId: Integer;
+      FPulpit: string;
+      FPassword: string;
+      FLogin: string;
     published
       property Id: Integer read FId write FId;
       property Login: string read FLogin write FLogin;
       property Password: string read FPassword write FPassword;
-      property Name: string read FName write FName;
+      property name: string read FName write FName;
       property Surname: string read FSurname write FSurname;
       property Pulpit: string read FPulpit write FPulpit;
       property Job: string read FJob write FJob;
+    public
+      procedure CopyFrom(const Teacher: TTeacher);
   end;
 
   TTeachers = array of TTeacher;
@@ -72,7 +76,7 @@ type
       property Id: Integer read FId write FId;
       property Login: string read FLogin write FLogin;
       property Password: string read FPassword write FPassword;
-      property Name: string read FName write FName;
+      property name: string read FName write FName;
       property Surname: string read FSurname write FSurname;
       /// <clientQualifier>N</clientQualifier>
       /// <supplierQualifier>1</supplierQualifier>
@@ -80,6 +84,7 @@ type
       /// <label>знаходиться</label>
       property Group: TGroup read FGroup write FGroup;
     public
+      procedure CopyFrom(const Student: TStudent);
       constructor Create;
       destructor Destroy; override;
   end;
@@ -241,6 +246,16 @@ implementation
 
 { TStudent }
 
+procedure TStudent.CopyFrom(const Student: TStudent);
+begin
+  FId := Student.Id;
+  FName := Student.name;
+  FSurname := Student.Surname;
+  FPassword := Student.Password;
+  FLogin := Student.Login;
+  FGroup.CopyFrom(Student.Group);
+end;
+
 constructor TStudent.Create;
 begin
   inherited;
@@ -251,6 +266,28 @@ destructor TStudent.Destroy;
 begin
   Group.Free;
   inherited;
+end;
+
+{ TTeacher }
+
+procedure TTeacher.CopyFrom(const Teacher: TTeacher);
+begin
+  FId := Teacher.Id;
+  FName := Teacher.name;
+  FSurname := Teacher.Surname;
+  FPassword := Teacher.Password;
+  FLogin := Teacher.Login;
+  FJob := Teacher.Job;
+  FPulpit := Teacher.Pulpit;
+end;
+
+{ TGroup }
+
+procedure TGroup.CopyFrom(const Group: TGroup);
+begin
+  FId := Group.Id;
+  FName := Group.name;
+  FDescription := Group.Description;
 end;
 
 initialization

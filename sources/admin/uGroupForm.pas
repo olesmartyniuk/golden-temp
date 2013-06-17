@@ -105,34 +105,39 @@ end;
 procedure TGroupForm.BitBtnOkClick(Sender: TObject);
 var
   splash: ISplash;
+  grp: TGroup;
 begin
   if not IsDataChanged then
   begin
     ModalResult := mrCancel;
     Exit;
   end;
-  splash := Dialog.NewSplash(Self);
-  splash.ShowSplash(cAddGroup);
+
   try
+    grp := TGroup.Create;
+    grp.CopyFrom(Group);
+    grp.Name := LabeledEditName.Text;
+    grp.Description := LabeledEditDescription.Text;
+    splash := Dialog.NewSplash(Self);
+    splash.ShowSplash(cAddGroup);
     try
-      Group.Name := LabeledEditName.Text;
-      Group.Description := LabeledEditDescription.Text;
-      if Group.Id = 0 then
-        Group.Id := Remotable.Administrator.GroupAdd(Remotable.Account, group)
+      if grp.Id = 0 then
+        grp.Id := Remotable.Administrator.GroupAdd(Remotable.Account, grp)
       else
-        Remotable.Administrator.GroupEdit(Remotable.Account, group);
-    except
-      on E: ERemotableError do
-      begin
-        ModalResult := mrCancel;
-        Dialog.ShowWarningMessage(E.Message);
-        Exit;
-      end;
+        Remotable.Administrator.GroupEdit(Remotable.Account, grp);
+    finally
+      splash.HideSplash;
     end;
-    ModalResult := mrOk;
-  finally
-    splash.HideSplash;
+    Group.CopyFrom(grp);
+  except
+    on E: ERemotableError do
+    begin
+      ModalResult := mrNone;
+      Dialog.ShowWarningMessage(E.Message, Self);
+      Exit;
+    end;
   end;
+  ModalResult := mrOk;
 end;
 
 end.
