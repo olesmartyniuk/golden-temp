@@ -38,7 +38,7 @@ type
   Dialog = class
     public
       class function NewSplash(MainForm: TForm): ISplash;
-      class procedure ShowWarningMessage(const AMessage: string);
+      class procedure ShowWarningMessage(const AMessage: string; AForm: TForm = nil);
   end;
 
 implementation
@@ -54,9 +54,11 @@ begin
   Result := TFormSplash.Create(MainForm);
 end;
 
-class procedure Dialog.ShowWarningMessage(const AMessage: string);
+class procedure Dialog.ShowWarningMessage(const AMessage: string; AForm: TForm);
 begin
-  MessageBox(Application.MainFormHandle, PChar(AMessage), 'Попередження', MB_OK);
+  if not Assigned(AForm) then
+    AForm := Application.MainForm;
+  MessageBox(AForm.Handle, PChar(AMessage), 'Попередження', MB_OK or MB_ICONWARNING);
 end;
 
 { Remotable }

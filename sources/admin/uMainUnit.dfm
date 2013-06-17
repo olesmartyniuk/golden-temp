@@ -27,7 +27,7 @@ object AdministratorMainForm: TAdministratorMainForm
     Top = 0
     Width = 772
     Height = 413
-    ActivePage = TabSheeTeachers
+    ActivePage = TabSheetGroups
     Align = alClient
     TabOrder = 0
     Visible = False
@@ -288,6 +288,7 @@ object AdministratorMainForm: TAdministratorMainForm
           OnCompare = ListViewStudentsByGroupsCompare
           OnKeyDown = ListViewStudentsByGroupsKeyDown
           OnSelectItem = ListViewStudentsByGroupsSelectItem
+          ExplicitTop = -7
         end
         object PanelStudentInGroup: TPanel
           Left = 1

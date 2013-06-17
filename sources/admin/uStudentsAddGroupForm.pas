@@ -65,13 +65,13 @@ var
 begin
   form := TStudentForm.Create(Self);
   try
+    form.Student := TStudent.Create;
     for i := 0 to Groups.Count - 1 do
       form.Groups.Add(Groups.Items[i].name);
     form.ComboBoxGroups.Enabled := False;
-    student := TStudent.Create;
     if form.ShowModal = mrOk then
     begin
-      StudentsList.Add(student);
+      StudentsList.Add(form.student);
       PrintStudentsList;
     end;
   finally
@@ -90,9 +90,9 @@ begin
     ModalResult := mrNone;
     Exit;
   end;
-  splash := Dialog.NewSplash(Self);
-  splash.ShowSplash('Додавання студентів до групи...');
   try
+    splash := Dialog.NewSplash(Self);
+    splash.ShowSplash('Додавання студентів до групи...');
     try
       for i := 0 to ListView.Items.Count - 1 do
       begin
@@ -103,15 +103,15 @@ begin
         Remotable.Administrator.StudentEdit(Remotable.Account, student);
         ModalResult := mrOk;
       end;
-    except
-      on E: ERemotableError do
-      begin
-        ModalResult := mrCancel;
-        ShowWarningMessage(E.Message);
-      end;
+    finally
+      splash.HideSplash;
     end;
-  finally
-    splash.HideSplash;
+  except
+    on E: ERemotableError do
+    begin
+      ModalResult := mrNone;
+      Dialog.ShowWarningMessage(E.Message, Self);
+    end;
   end;
 end;
 
@@ -157,7 +157,7 @@ begin
   end
   else
   begin
-    PanelInfo.Caption := 'Для групового виділення використовуйте затиснуті клавіші Ctrl або Shift';
+    PanelInfo.Caption := 'Для групового виділення використовуйте клавіші Ctrl або Shift';
     ListView.Enabled := True;
   end;
 end;

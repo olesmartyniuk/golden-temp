@@ -168,42 +168,48 @@ end;
 procedure TTeacherForm.BitBtnOkClick(Sender: TObject);
 var
   splash: ISplash;
+  teach: TTeacher;
 begin
   if not IsDataChanged then
   begin
     ModalResult := mrCancel;
     Exit;
   end;
-  splash := Dialog.NewSplash(Self);
+
+  teach := TTeacher.Create;
+  teach.CopyFrom(Teacher);
+  teach.Login := LabeledEditLogin.Text;
+  teach.Password := LabeledEditPassword.Text;
+  teach.Name := LabeledEditName.Text;
+  teach.Surname := LabeledEditSurname.Text;
+  teach.Pulpit := LabeledEditCathedra.Text;
+  if ComboBoxPosition.ItemIndex <> 0 then
+    teach.Job := ComboBoxPosition.Text;
   try
-    Teacher.Login := LabeledEditLogin.Text;
-    Teacher.Password := LabeledEditPassword.Text;
-    Teacher.Name := LabeledEditName.Text;
-    Teacher.Surname := LabeledEditSurname.Text;
-    Teacher.Pulpit := LabeledEditCathedra.Text;
-    if ComboBoxPosition.ItemIndex <> 0 then
-      Teacher.Job := ComboBoxPosition.Text;
+    splash := Dialog.NewSplash(Self);
     try
-      if Teacher.Id = 0 then
+      if teach.Id = 0 then
       begin
         splash.ShowSplash(cAddTeacher);
-        Teacher.Id := Remotable.Administrator.TeacherAdd(Remotable.Account, Teacher);
+        teach.Id := Remotable.Administrator.TeacherAdd(Remotable.Account, teach);
       end
       else
       begin
         splash.ShowSplash(cEditTeacher);
-        Remotable.Administrator.TeacherEdit(Remotable.Account, Teacher);
+        Remotable.Administrator.TeacherEdit(Remotable.Account, teach);
       end;
-    except
-      on E: ERemotableError do
-      begin
-        ModalResult := mrCancel;
-        ShowWarningMessage(E.Message);
-        Exit;
-      end;
+    finally
+      splash.HideSplash;
     end;
-  finally
-    splash.HideSplash;
+    Teacher.CopyFrom(teach);
+    teach.Free;
+  except
+    on E: ERemotableError do
+    begin
+      ModalResult := mrNone;
+      Dialog.ShowWarningMessage(E.Message, Self);
+      Exit;
+    end;
   end;
   ModalResult := mrOk;
 end;
