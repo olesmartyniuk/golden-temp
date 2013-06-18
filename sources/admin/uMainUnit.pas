@@ -165,7 +165,7 @@ type
       FTeachers: TList<TTeacher>;
       FSettings: ISettings;
       FGuiBlocked: Boolean;
-      FLogined: Boolean;
+      FServer: IAdministrator;
     private
       procedure ChangeState;
       procedure ShowSplash(const aMessage: string);
@@ -433,7 +433,6 @@ procedure TAdministratorMainForm.ActionLoginExecute(Sender: TObject);
 begin
   if Login then
   begin
-    FLogined := True;
     GetAll;
     PageControl.TabIndex := FSettings.GetInt('active_tab', 0);
   end;
@@ -441,7 +440,7 @@ end;
 
 procedure TAdministratorMainForm.ActionLogoutExecute(Sender: TObject);
 begin
-  FLogined := False;
+  FServer := nil;
   ChangeState;
 end;
 
@@ -476,7 +475,7 @@ begin
 
   ShowSplash(cPasswordChange);
   try
-    Remotable.Administrator.PasswordEdit(Remotable.Account, newPassword);
+    FServer.PasswordEdit(Remotable.Account, newPassword);
   finally
     HideSplash;
   end;
@@ -522,10 +521,10 @@ begin
   ActionHelp.Enabled := not FGuiBlocked;
   ActionAbout.Enabled := not FGuiBlocked;
 
-  PageControl.Visible := FLogined;
-  StatusBar.Visible := FLogined;
-  MenuLogin.Visible := not FLogined;
-  MenuLogout.Visible := FLogined;
+  PageControl.Visible := Assigned(FServer);
+  StatusBar.Visible := Assigned(FServer);
+  MenuLogin.Visible := not Assigned(FServer);
+  MenuLogout.Visible := Assigned(FServer);
 end;
 
 function TAdministratorMainForm.DelGroup(aName: string): Boolean;
@@ -533,7 +532,7 @@ begin
   Result := False;
   try
     ShowSplash(cDeletingGroup);
-    Remotable.Administrator.GroupDel(Remotable.Account, AName);
+    FServer.GroupDel(Remotable.Account, AName);
     Result := True;
   finally
     HideSplash;
@@ -545,7 +544,7 @@ begin
   Result := False;
   try
     ShowSplash(cDeletingStudent);
-    Remotable.Administrator.StudentDel(Remotable.Account, ALogin);
+    FServer.StudentDel(Remotable.Account, ALogin);
     Result := True;
   finally
     HideSplash;
@@ -557,7 +556,7 @@ begin
   Result := False;
   try
     ShowSplash(cDeletingTeacher);
-    Remotable.Administrator.TeacherDel(Remotable.Account, ALogin);
+    FServer.TeacherDel(Remotable.Account, ALogin);
     Result := True;
   finally
     HideSplash;
@@ -608,7 +607,7 @@ var
   groupArr: TGroups;
   i: Integer;
 begin
-  groupArr := Remotable.Administrator.GroupGet(Remotable.Account);
+  groupArr := FServer.GroupGet(Remotable.Account);
   FGroups.Clear;
   for i := low(groupArr) to high(groupArr) do
     FGroups.Add(groupArr[i]);
@@ -656,7 +655,7 @@ var
   i: Integer;
 begin
   // отримання списку студентів
-  students := Remotable.Administrator.StudentGet(Remotable.Account);
+  students := FServer.StudentGet(Remotable.Account);
   FStudents.Clear;
   for i := low(students) to high(students) do
     FStudents.Add(students[i]);
@@ -669,7 +668,7 @@ var
   i: Integer;
 begin
   // отримання списку викладачів
-  teachers := Remotable.Administrator.TeacherGet(Remotable.Account);
+  teachers := FServer.TeacherGet(Remotable.Account);
   FTeachers.Clear;
   for i := low(teachers) to high(teachers) do
     FTeachers.Add(teachers[i]);
@@ -904,19 +903,16 @@ var
   form: TAccountForm;
 begin
   Result := False;
+
   Remotable.Account.Login := 'admin';
   Remotable.Account.Password := FSettings.GetStr('password', '');
 
   form := TAccountForm.Create(Self);
   try
-    form.HelpContext := 3010;
     form.EditLogin.Enabled := False;
     form.CheckBoxSavePassword.Checked := FSettings.GetBool('savepassword', False);
     if form.ShowModal <> mrOk then
       Exit;
-    Remotable.Host := form.EditHost.Text;
-    Remotable.Account.Login := form.EditLogin.Text;
-    Remotable.Account.Password := form.EditPassword.Text;
 
     FSettings.SetBool('savepassword', form.CheckBoxSavePassword.Checked);
     FSettings.SetStr('host', Remotable.Host);
@@ -930,7 +926,8 @@ begin
     splash.ShowSplash(Format(cMessWaitForAnswer, [Remotable.Host]));
     try
       try
-        Remotable.Administrator.TeacherGet(Remotable.Account);
+        FServer := Remotable.NewAdministrator();
+        FServer.TeacherGet(Remotable.Account);
         Result := True;
       finally
         splash.HideSplash;
@@ -1053,10 +1050,10 @@ end;
 
 function TAdministratorMainForm.Splash: ISplash;
 begin
-  if not Assigned(fSplash) then
+  if not Assigned(FSplash) then
   begin
-    fSplash := Dialog.NewSplash(Self);
-    fSplash.ShowProgress := False;
+    FSplash := Dialog.NewSplash(Self);
+    FSplash.ShowProgress := False;
   end;
   Result := fSplash;
 end;
@@ -1087,7 +1084,7 @@ begin
   ShowSplash(cDeletingStudFromGroup);
   try
     student.Group.Name := '';
-    Remotable.Administrator.StudentEdit(Remotable.Account, student);
+    FServer.StudentEdit(Remotable.Account, student);
     PrintStudents;
     PrintStudentOfGroup(group.Name);
   finally

@@ -84,6 +84,7 @@ var
   i: Integer;
   student: TStudent;
   splash: ISplash;
+  server: IAdministrator;
 begin
   if not Assigned(ListView.Selected) then
   begin
@@ -94,13 +95,14 @@ begin
     splash := Dialog.NewSplash(Self);
     splash.ShowSplash('Додавання студентів до групи...');
     try
+      server := Remotable.NewAdministrator();
       for i := 0 to ListView.Items.Count - 1 do
       begin
         if not ListView.Items[i].Selected then
           Continue;
         student := StudentsList.Items[Integer(ListView.Items[i].Data)];
         student.Group.Name := Group;
-        Remotable.Administrator.StudentEdit(Remotable.Account, student);
+        server.StudentEdit(Remotable.Account, student);
         ModalResult := mrOk;
       end;
     finally

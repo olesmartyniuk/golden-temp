@@ -29,6 +29,7 @@ type
     ButtonOK: TButton;
     ButtonCancel: TButton;
     procedure FormShow(Sender: TObject);
+    procedure ButtonOKClick(Sender: TObject);
       { Private declarations }
   end;
 
@@ -42,6 +43,13 @@ uses
   uMainUnit;
 
 {$R *.DFM}
+
+procedure TAccountForm.ButtonOKClick(Sender: TObject);
+begin
+  Remotable.Account.Login := EditLogin.Text;
+  Remotable.Account.Password := EditPassword.Text;
+  Remotable.Host := EditHost.Text;
+end;
 
 procedure TAccountForm.FormShow(Sender: TObject);
 begin

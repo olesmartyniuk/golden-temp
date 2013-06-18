@@ -24,6 +24,8 @@ uses
 type
 
   TestAdministrator = class(TTestCase)
+    private
+      FAdmin: IAdministrator;
     public
       procedure SetUp; override;
       procedure TearDown; override;
@@ -58,6 +60,7 @@ begin
   Remotable.Host := 'localhost';
   Remotable.Account.Login := 'admin';
   Remotable.Account.Password := '123';
+  FAdmin := Remotable.NewAdministrator(Remotable.Host);
 end;
 
 procedure TestAdministrator.TearDown;
@@ -74,7 +77,7 @@ begin
   group := TGroup.Create;
   try
     // спробуємо додати групу з порожнім іменем
-    returnValue := Remotable.Administrator.GroupAdd(Remotable.Account, group);
+    returnValue := FAdmin.GroupAdd(Remotable.Account, group);
     Check(False, 'Додано групу з порожнім іменем');
   except
     on E: EWrongValue do; // глушимо ексепшен
@@ -83,12 +86,12 @@ begin
   // додамо групу
   group.name := '4 ПР 2';
   group.Description := 'Програмісти 4 курс';
-  returnValue := Remotable.Administrator.GroupAdd(Remotable.Account, group);
+  returnValue := FAdmin.GroupAdd(Remotable.Account, group);
   group.Id := returnValue;
   Check(group.Id > 0, 'Некоректний ID щойно створеної групи');
 
   // перевіримо чи додалась група
-  groups := Remotable.Administrator.GroupGet(Remotable.Account);
+  groups := FAdmin.GroupGet(Remotable.Account);
   Check(Length(groups) = 1, 'Некоректна кількість груп, повинна бути 1');
 
   Check(groups[0].Id = returnValue, 'Некоректний ID зчитаної групи');
@@ -97,7 +100,7 @@ begin
 
   // спробуємо додати групу з такою ж назвою
   try
-    Remotable.Administrator.GroupAdd(Remotable.Account, group);
+    FAdmin.GroupAdd(Remotable.Account, group);
     Check(False, 'Додано групу з дублюючою назвою');
   except
     on E: EAlreadyExists do; // глушимо ексепшен
@@ -106,9 +109,9 @@ begin
   // переіменуємо групу і перевіримо
   group.name := '5 ПР 2';
   group.Description := 'Програмісти 5 курс';
-  Remotable.Administrator.GroupEdit(Remotable.Account, group);
+  FAdmin.GroupEdit(Remotable.Account, group);
 
-  groups := Remotable.Administrator.GroupGet(Remotable.Account);
+  groups := FAdmin.GroupGet(Remotable.Account);
   Check(Length(groups) = 1, 'Некоректна кількість груп, повинна бути 1');
 
   Check(groups[0].Id = returnValue, 'Некоректний ID зчитаної групи');
@@ -116,8 +119,8 @@ begin
   Check(groups[0].Description = 'Програмісти 5 курс', 'Некоректний опис зчитаної групи');
 
   // перевіримо видалення групи
-  Remotable.Administrator.GroupDel(Remotable.Account, group.name);
-  groups := Remotable.Administrator.GroupGet(Remotable.Account);
+  FAdmin.GroupDel(Remotable.Account, group.name);
+  groups := FAdmin.GroupGet(Remotable.Account);
   Check(Length(groups) = 0, 'Некоректна кількість груп, повинна бути 0');
 
   // додамо 100 груп і перевіримо, чи коректно записались
@@ -126,11 +129,11 @@ begin
     group := TGroup.Create;
     group.name := IntToStr(i);
     group.Description := 'Опис для групи № ' + group.Name;
-    returnValue := Remotable.Administrator.GroupAdd(Remotable.Account, group);
+    returnValue := FAdmin.GroupAdd(Remotable.Account, group);
     Check(returnValue > 0, 'Некоректний ID щойно створеної групи');
   end;
 
-  groups := Remotable.Administrator.GroupGet(Remotable.Account);
+  groups := FAdmin.GroupGet(Remotable.Account);
   Check(Length(groups) = 100, 'Некоректна кількість груп, повинна бути 100');
 
   for i := Low(groups) to High(groups) do
@@ -138,8 +141,8 @@ begin
 
   // почистимо після себе
   for i := Low(groups) to High(groups) do
-    Remotable.Administrator.GroupDel(Remotable.Account, groups[i].name);
-  groups := Remotable.Administrator.GroupGet(Remotable.Account);
+    FAdmin.GroupDel(Remotable.Account, groups[i].name);
+  groups := FAdmin.GroupGet(Remotable.Account);
   Check(Length(groups) = 0, 'Некоректна кількість груп, повинна бути 0');
 end;
 

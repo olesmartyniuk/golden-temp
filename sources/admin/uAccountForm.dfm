@@ -1,7 +1,7 @@
 object AccountForm: TAccountForm
   Left = 0
   Top = 0
-  HelpContext = 4021
+  HelpContext = 3010
   ActiveControl = ButtonOK
   BorderStyle = bsDialog
   Caption = #1042#1093#1110#1076
@@ -93,6 +93,7 @@ object AccountForm: TAccountForm
     Caption = 'OK'
     ModalResult = 1
     TabOrder = 1
+    OnClick = ButtonOKClick
   end
   object ButtonCancel: TButton
     Left = 283
