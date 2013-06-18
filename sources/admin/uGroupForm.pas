@@ -106,6 +106,7 @@ procedure TGroupForm.BitBtnOkClick(Sender: TObject);
 var
   splash: ISplash;
   grp: TGroup;
+  server: IAdministrator;
 begin
   if not IsDataChanged then
   begin
@@ -121,10 +122,11 @@ begin
     splash := Dialog.NewSplash(Self);
     splash.ShowSplash(cAddGroup);
     try
+      server := Remotable.NewAdministrator();
       if grp.Id = 0 then
-        grp.Id := Remotable.Administrator.GroupAdd(Remotable.Account, grp)
+        grp.Id := server.GroupAdd(Remotable.Account, grp)
       else
-        Remotable.Administrator.GroupEdit(Remotable.Account, grp);
+        server.GroupEdit(Remotable.Account, grp);
     finally
       splash.HideSplash;
     end;

@@ -194,6 +194,7 @@ procedure TStudentForm.BitBtnOkClick(Sender: TObject);
 var
   splash: ISplash;
   stud: TStudent;
+  server: IAdministrator;
 begin
   if not IsDataChanged then
   begin
@@ -215,10 +216,11 @@ begin
     splash := Dialog.NewSplash(Self);
     splash.ShowSplash(cAddStudent);
     try
+      server := Remotable.NewAdministrator();
       if stud.Id = 0 then
-        stud.Id := Remotable.Administrator.StudentAdd(Remotable.Account, stud)
+        stud.Id := server.StudentAdd(Remotable.Account, stud)
       else
-        Remotable.Administrator.StudentEdit(Remotable.Account, stud);
+        server.StudentEdit(Remotable.Account, stud);
       Student.CopyFrom(stud);
       stud.Free;
     finally

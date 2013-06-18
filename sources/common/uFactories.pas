@@ -20,19 +20,15 @@ type
   Remotable = class
     private
       class var FHost: string;
-      class var FAdministrator: IAdministrator;
       class var FAccount: TAccount;
     private
       class function GetHost: string; static;
       class procedure SetHost(const Value: string); static;
-
       class function GetAccount: TAccount; static;
-      class function GetAdministrator: IAdministrator; static;
-      class procedure SetAdministrator(const Value: IAdministrator); static;
     public
-      class property Administrator: IAdministrator read GetAdministrator write SetAdministrator;
-      class property Host: string read GetHost write SetHost;
+      class function NewAdministrator(const Host: string = ''): IAdministrator;
       class property Account: TAccount read GetAccount;
+      class property Host: string read GetHost write SetHost;
   end;
 
   Dialog = class
@@ -70,31 +66,24 @@ begin
   Result := FAccount;
 end;
 
-class function Remotable.GetAdministrator: IAdministrator;
-var
-  HTTPRIO: THTTPRIO;
-begin
-  if not Assigned(FAdministrator) then
-  begin
-    HTTPRIO := THTTPRIO.Create(nil);
-
-    // FAdministrator.HTTPWebNode.OnPostingData := OnPostData;
-    // FAdministrator.HTTPWebNode.OnReceivingData := OnReceiveData;
-    // FAdministrator.HTTPWebNode.OnWinInetError := OnInetError;
-    HTTPRIO.URL := Format('http://%s:%d/soap/IAdministrator', [FHost, 3030]);
-    FAdministrator := HTTPRIO as IAdministrator;
-  end;
-  Result := FAdministrator;
-end;
-
 class function Remotable.GetHost: string;
 begin
   Result := FHost;
 end;
 
-class procedure Remotable.SetAdministrator(const Value: IAdministrator);
+class function Remotable.NewAdministrator(const Host: string): IAdministrator;
+var
+  HTTPRIO: THTTPRIO;
+  str: string;
 begin
-  Administrator := Value;
+  str := Host;
+  if str = '' then
+    str := FHost;
+  if str = '' then
+    raise Exception.Create('Не вказано хост, до якого необхідно підключитись.');
+  HTTPRIO := THTTPRIO.Create(nil);
+  HTTPRIO.URL := Format('http://%s:%d/soap/IAdministrator', [str, 3030]);
+  Result := HTTPRIO as IAdministrator;
 end;
 
 class procedure Remotable.SetHost(const Value: string);
@@ -102,7 +91,6 @@ begin
   if SameText(FHost, Value) then
     Exit;
   FHost := Value;
-  FAdministrator := nil;
 end;
 
 { Core }

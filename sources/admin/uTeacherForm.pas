@@ -169,6 +169,7 @@ procedure TTeacherForm.BitBtnOkClick(Sender: TObject);
 var
   splash: ISplash;
   teach: TTeacher;
+  server: IAdministrator;
 begin
   if not IsDataChanged then
   begin
@@ -188,15 +189,16 @@ begin
   try
     splash := Dialog.NewSplash(Self);
     try
+      server := Remotable.NewAdministrator();
       if teach.Id = 0 then
       begin
         splash.ShowSplash(cAddTeacher);
-        teach.Id := Remotable.Administrator.TeacherAdd(Remotable.Account, teach);
+        teach.Id := server.TeacherAdd(Remotable.Account, teach);
       end
       else
       begin
         splash.ShowSplash(cEditTeacher);
-        Remotable.Administrator.TeacherEdit(Remotable.Account, teach);
+        server.TeacherEdit(Remotable.Account, teach);
       end;
     finally
       splash.HideSplash;

@@ -27,7 +27,7 @@ object AdministratorMainForm: TAdministratorMainForm
     Top = 0
     Width = 772
     Height = 413
-    ActivePage = TabSheetGroups
+    ActivePage = TabSheeTeachers
     Align = alClient
     TabOrder = 0
     Visible = False
@@ -288,7 +288,6 @@ object AdministratorMainForm: TAdministratorMainForm
           OnCompare = ListViewStudentsByGroupsCompare
           OnKeyDown = ListViewStudentsByGroupsKeyDown
           OnSelectItem = ListViewStudentsByGroupsSelectItem
-          ExplicitTop = -7
         end
         object PanelStudentInGroup: TPanel
           Left = 1
@@ -383,7 +382,7 @@ object AdministratorMainForm: TAdministratorMainForm
     Left = 312
     Top = 8
     Bitmap = {
-      494C01010C000E00500014001400FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C01010C000E00540014001400FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000500000005000000001002000000000000064
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
