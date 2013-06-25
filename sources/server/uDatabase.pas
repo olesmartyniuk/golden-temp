@@ -221,8 +221,8 @@ var
 begin
   query := QueryOpen(Database);
   try
-    if Student.Group.Name <> '' then
-      group := GroupGet(Database, Student.Group.Name)
+    if Student.GroupId > 0 then
+      group := GroupGet(Database, Student.GroupId)
     else
       group := nil;
 
@@ -314,7 +314,7 @@ begin
       end
       else
       begin
-        query.SQL.Text := 'select STUDENTS.*, GROUPS.NAME as GROUPNAME from STUDENTS left join GROUPS on STUDENTS.ID_GROUP=GROUPS.ID ' +
+        query.SQL.Text := 'select STUDENTS.* from STUDENTS left join GROUPS on STUDENTS.ID_GROUP=GROUPS.ID ' +
           'where STUDENTS.LOGIN like :LOGIN and STUDENTS.NAME like :NAME and STUDENTS.SURNAME like :SURNAME and GROUPS.NAME like :GROUP';
         query.ParamByName('LOGIN').AsString := StudentLogin;
         query.ParamByName('NAME').AsString := StudentName;
@@ -331,7 +331,7 @@ begin
         Result[high(Result)].Password := query.FldByName['PASSW'].AsString;
         Result[high(Result)].Name := query.FldByName['NAME'].AsString;
         Result[high(Result)].Surname := query.FldByName['SURNAME'].AsString;
-        Result[high(Result)].Group.Name := query.FldByName['GROUPNAME'].AsString;
+        Result[high(Result)].GroupId := query.FldByName['ID_GROUP'].AsInteger;
         query.Next;
       end;
     end;
@@ -376,8 +376,8 @@ var
 begin
   query := QueryOpen(Database);
   try
-    if Student.Group.Name <> '' then
-      group := GroupGet(Database, Student.Group.Name)
+    if Student.GroupId > 0 then
+      group := GroupGet(Database, Student.GroupId)
     else
       group := nil;
 

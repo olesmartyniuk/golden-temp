@@ -38,7 +38,7 @@ type
       function GetVisible: boolean;
       procedure SetVisible(Value: boolean);
 
-      procedure ShowSplash(const Message: WideString); overload;
+      procedure ShowSplash(const Message: string); overload;
       procedure HideSplash;
       constructor Create(aMainForm: TForm);
   end;
@@ -128,7 +128,7 @@ begin
   Show;
 end;
 
-procedure TFormSplash.ShowSplash(const Message: WideString);
+procedure TFormSplash.ShowSplash(const Message: string);
 begin
   LabelMessage.Caption := message;
   ShowSplash;

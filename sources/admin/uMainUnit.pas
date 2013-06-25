@@ -22,6 +22,7 @@ uses
   AppEvnts,
   uInterfaces,
   XPMan,
+  Math,
   ToolWin,
   SOAPHttpClient,
   Generics.Collections,
@@ -171,8 +172,14 @@ type
       procedure ShowSplash(const aMessage: string);
       procedure HideSplash;
       function Splash: ISplash;
+
+      function GetStudentById(Id: Integer): TStudent;
+      function GetTeacherById(Id: Integer): TTeacher;
+      function GetGroupById(Id: Integer): TGroup;
+
       function GetSelectedStudent: TStudent;
       function GetSelectedGroup: TGroup;
+
       function GetSelectedTeacher: TTeacher;
 
       function DelGroup(aName: string): Boolean;
@@ -184,10 +191,9 @@ type
       procedure GetStudentsList;
       procedure GetTeachersList;
       procedure PrintStudents;
-      procedure PrintStudentOfGroup(aGroup: string);
+      procedure PrintStudentOfGroup(AGroupId: Integer);
       procedure PrintGroups;
       procedure PrintTeachers;
-      procedure PrintOnImage(aNumber: Integer);
 
       function Login: Boolean;
   end;
@@ -253,8 +259,8 @@ begin
     if DelGroup(group.Name) then
     begin
       for i := 0 to FStudents.Count - 1 do
-        if SameText(group.Name, (FStudents.Items[i] as TStudent).Group.Name) then
-          (FStudents.Items[i] as TStudent).Group.Name := '';
+        if group.Id = (FStudents.Items[i] as TStudent).GroupId then
+          (FStudents.Items[i] as TStudent).GroupId := 0;
       FGroups.Delete(FGroups.IndexOf(group));
       PrintGroups;
       PrintStudents;
@@ -265,7 +271,6 @@ procedure TAdministratorMainForm.ActionGroupEditExecute(Sender: TObject);
 var
   form: TGroupForm;
   group: TGroup;
-  oldName: string;
   i: Integer;
 begin
   group := GetSelectedGroup;
@@ -274,12 +279,8 @@ begin
   form := TGroupForm.Create(Self);
   try
     form.Group := group;
-    oldName := group.Name;
     if form.ShowModal = mrOk then
     begin
-      for i := 0 to FStudents.Count - 1 do
-        if SameText(FStudents.Items[i].Group.Name, oldName) then
-          FStudents.Items[i].Group.Name := group.Name;
       PrintStudents;
       PrintGroups;
     end;
@@ -305,8 +306,7 @@ begin
   form := TStudentForm.Create(Self);
   try
     form.Student := student;
-    for i := 0 to fGroups.Count - 1 do
-      form.Groups.Add(fGroups.Items[i].Name);
+    form.Groups := FGroups;
     if form.ShowModal = mrOk then
       PrintStudents;
   finally
@@ -391,8 +391,7 @@ begin
   form := TStudentForm.Create(Self);
   try
     student := TStudent.Create;
-    for i := 0 to fGroups.Count - 1 do
-      form.Groups.Add(fGroups.Items[i].Name);
+    form.Groups := FGroups;
     form.Student := student;
     if form.ShowModal = mrOk then
     begin
@@ -415,13 +414,13 @@ begin
     Exit;
   form := TFormAddStudent.Create(Self);
   try
-    form.Group := group.Name;
+    form.Group := group;
     form.Groups := FGroups;
     form.StudentsList := FStudents;
     if form.ShowModal = mrOK then
     begin
       PrintStudents;
-      PrintStudentOfGroup(group.Name);
+      PrintStudentOfGroup(group.Id);
     end;
     form.StudentsList := nil;
   finally
@@ -590,15 +589,25 @@ procedure TAdministratorMainForm.GetAll;
 begin
   ShowSplash(cGetTeachersList);
   try
+    ShowSplash(cGetGroupsList);
+    GetGroupsList;
     GetTeachersList;
     ShowSplash(cGetstudentsList);
     GetStudentsList;
-    ShowSplash(cGetGroupsList);
-    GetGroupsList;
   finally
     HideSplash;
   end;
   ChangeState;
+end;
+
+function TAdministratorMainForm.GetGroupById(Id: Integer): TGroup;
+var
+  group: TGroup;
+begin
+  for group in FGroups do
+    if group.Id = Id then
+      Exit(group);
+  Result := nil;
 end;
 
 procedure TAdministratorMainForm.GetGroupsList;
@@ -619,7 +628,7 @@ begin
   Result := nil;
   if not Assigned(ListViewGroups.Selected) then
     Exit;
-  Result := FGroups.Items[Integer(ListViewGroups.Selected.Data)];
+  Result := GetGroupById(Integer(ListViewGroups.Selected.Data));
 end;
 
 function TAdministratorMainForm.GetSelectedStudent: TStudent;
@@ -636,7 +645,7 @@ begin
         id := Integer(ListViewStudentsByGroups.Selected.Data);
   end;
   if id > 0 then
-    Result := FStudents.Items[id]
+    Result := GetStudentById(id)
   else
     Result := nil;
 end;
@@ -646,7 +655,17 @@ begin
   Result := nil;
   if not Assigned(ListViewTeachers.Selected) then
     Exit;
-  Result := FTeachers.Items[Integer(ListViewTeachers.Selected.Data)];
+  Result := GetTeacherById(Integer(ListViewTeachers.Selected.Data));
+end;
+
+function TAdministratorMainForm.GetStudentById(Id: Integer): TStudent;
+var
+  student: TStudent;
+begin
+  for student in FStudents do
+    if student.Id = Id then
+      Exit(student);
+  Result := nil;
 end;
 
 procedure TAdministratorMainForm.GetStudentsList;
@@ -660,6 +679,16 @@ begin
   for i := low(students) to high(students) do
     FStudents.Add(students[i]);
   PrintStudents;
+end;
+
+function TAdministratorMainForm.GetTeacherById(Id: Integer): TTeacher;
+var
+  teacher: TTeacher;
+begin
+  for teacher in FTeachers do
+    if teacher.Id = Id then
+      Exit(teacher);
+  Result := nil;
 end;
 
 procedure TAdministratorMainForm.GetTeachersList;
@@ -719,8 +748,8 @@ begin
     Compare := 0;
     Exit;
   end;
-  group1 := FGroups[Integer(Item1.Data)];
-  group2 := FGroups[Integer(Item2.Data)];
+  group1 := GetGroupById(Integer(Item1.Data));
+  group2 := GetGroupById(Integer(Item2.Data));
   case Data of
     0:
       Compare := WideCompareText(group1.Name, group2.Name);
@@ -756,7 +785,7 @@ begin
   group := GetSelectedGroup;
   if not Assigned(group) then
     Exit;
-  PrintStudentOfGroup(group.Name);
+  PrintStudentOfGroup(group.Id);
 end;
 
 procedure TAdministratorMainForm.ListViewStudentsByGroupsCompare(Sender: TObject; Item1, Item2: TListItem; Data: Integer; var Compare: Integer);
@@ -768,9 +797,9 @@ begin
     Compare := 0;
     Exit;
   end;
-  student1 := FStudents.Items[Integer(Item1.Data)];
-  student2 := FStudents.Items[Integer(Item2.Data)];
-  Compare := WideCompareText(student1.Surname + ' ' + student1.Name, student2.Surname + ' ' + student2.Name);
+  student1 := GetStudentById(Integer(Item1.Data));
+  student2 := GetStudentById(Integer(Item2.Data));
+  Compare := CompareText(student1.Surname + ' ' + student1.Name, student2.Surname + ' ' + student2.Name);
 end;
 
 procedure TAdministratorMainForm.ListViewStudentsByGroupsKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -806,17 +835,17 @@ begin
     Compare := 0;
     Exit;
   end;
-  student1 := FStudents.Items[Integer(Item1.Data)];
-  student2 := FStudents.Items[Integer(Item2.Data)];
+  student1 := GetStudentById(Integer(Item1.Data));
+  student2 := GetStudentById(Integer(Item2.Data));
   case Data of
     0:
-      Compare := WideCompareText(student1.Surname, student2.Surname);
+      Compare := CompareText(student1.Surname, student2.Surname);
     1:
-      Compare := WideCompareText(student1.Name, student2.Name);
+      Compare := CompareText(student1.Name, student2.Name);
     2:
-      Compare := WideCompareText(student1.Login, student2.Login);
+      Compare := CompareText(student1.Login, student2.Login);
     3:
-      Compare := WideCompareText(student1.Group.Name, student2.Group.Name);
+      Compare := CompareValue(student1.GroupId, student2.GroupId);
   end;
   if ListViewStudents.Tag < 0 then
     Compare := - Compare;
@@ -857,8 +886,8 @@ begin
     Compare := 0;
     Exit;
   end;
-  teacher1 := FTeachers.Items[Integer(Item1.Data)];
-  teacher2 := FTeachers.Items[Integer(Item2.Data)];
+  teacher1 := GetTeacherById(Integer(Item1.Data));
+  teacher2 := GetTeacherById(Integer(Item2.Data));
   case Data of
     0:
       Compare := WideCompareText(teacher1.Surname, teacher2.Surname);
@@ -958,7 +987,7 @@ begin
     with ListViewGroups.Items.Add do
     begin
       ImageIndex := 4;
-      Data := Pointer(i);
+      Data := Pointer(group.Id);
       Caption := group.Name;
       SubItems.Add(group.Description);
     end;
@@ -967,22 +996,7 @@ begin
   ListViewGroups.CustomSort(nil, 0);
 end;
 
-procedure TAdministratorMainForm.PrintOnImage(aNumber: Integer);
-var
-  btm: TBitmap;
-begin
-  btm := TBitmap.Create;
-  try
-    ImageList.GetBitmap(aNumber, btm);
-    btm.TransparentColor := clWhite;
-    ImageServerStatus.Picture.Bitmap := btm;
-    ImageServerStatus.Transparent := True;
-  finally
-    btm.Free;
-  end;
-end;
-
-procedure TAdministratorMainForm.PrintStudentOfGroup(aGroup: string);
+procedure TAdministratorMainForm.PrintStudentOfGroup(AGroupId: Integer);
 var
   student: TStudent;
   i: Integer;
@@ -991,12 +1005,12 @@ begin
   for i := 0 to FStudents.Count - 1 do
   begin
     student := FStudents.Items[i];
-    if not SameText(student.Group.Name, aGroup) then
+    if student.GroupId <> AGroupId then
       Continue;
     with ListViewStudentsByGroups.Items.Add do
     begin
       ImageIndex := 2;
-      Data := Pointer(i);
+      Data := Pointer(student.Id);
       Caption := student.Surname + ' ' + student.Name;
     end;
   end;
@@ -1007,6 +1021,7 @@ procedure TAdministratorMainForm.PrintStudents;
 var
   student: TStudent;
   i: Integer;
+  group: TGroup;
 begin
   ListViewStudents.Clear;
   for i := 0 to FStudents.Count - 1 do
@@ -1015,11 +1030,13 @@ begin
     with ListViewStudents.Items.Add do
     begin
       ImageIndex := 2;
-      Data := Pointer(i);
+      Data := Pointer(student.Id);
       Caption := student.Surname;
       SubItems.Add(student.Name);
       SubItems.Add(student.Login);
-      SubItems.Add(student.Group.Name);
+      group := GetGroupById(student.GroupId);
+      if Assigned(group) then
+        SubItems.Add(group.Name);
     end;
   end;
   ListViewStudents.CustomSort(nil, 0);
@@ -1037,7 +1054,7 @@ begin
     with ListViewTeachers.Items.Add do
     begin
       ImageIndex := 3;
-      Data := Pointer(i);
+      Data := Pointer(teacher.Id);
       Caption := teacher.Surname;
       SubItems.Add(teacher.Name);
       SubItems.Add(teacher.Login);
@@ -1083,10 +1100,10 @@ begin
     Exit;
   ShowSplash(cDeletingStudFromGroup);
   try
-    student.Group.Name := '';
+    student.GroupId := 0;
     FServer.StudentEdit(Remotable.Account, student);
     PrintStudents;
-    PrintStudentOfGroup(group.Name);
+    PrintStudentOfGroup(group.Id);
   finally
     HideSplash;
   end;

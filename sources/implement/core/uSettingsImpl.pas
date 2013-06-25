@@ -13,16 +13,16 @@ type
   TSettingsImpl = class(TInterfacedObject, ISettings)
   private
     fIniFile: TIniFile;
-    fSectionName: WideString;
+    fSectionName: string;
   protected
-    function GetSectionName: WideString;
-    procedure SetSectionName(const Value: WideString);
-    function GetStr(aParamName: WideString; const aDefault: WideString): WideString;
-    function GetInt(aParamName: WideString; const aDefault: Integer): Integer;
-    function GetBool(aParamName: WideString; const aDefault: Boolean): Boolean;
-    procedure SetStr(aParamName: WideString; aValue: WideString);
-    procedure SetInt(aParamName: WideString; aValue: Integer);
-    procedure SetBool(aParamName: WideString; aValue: Boolean);
+    function GetSectionName: string;
+    procedure SetSectionName(const Value: string);
+    function GetStr(aParamName: string; const aDefault: string): string;
+    function GetInt(aParamName: string; const aDefault: Integer): Integer;
+    function GetBool(aParamName: string; const aDefault: Boolean): Boolean;
+    procedure SetStr(aParamName: string; aValue: string);
+    procedure SetInt(aParamName: string; aValue: Integer);
+    procedure SetBool(aParamName: string; aValue: Boolean);
   public
     constructor Create;
     destructor Destroy; override;
@@ -34,7 +34,7 @@ implementation
 
 constructor TSettingsImpl.Create;
 var
-  path: WideString;
+  path: string;
 begin
   path := GetDirData + '\settings.ini';
   if not DirectoryExists(GetDirData) then
@@ -49,46 +49,46 @@ begin
   inherited;
 end;
 
-function TSettingsImpl.GetBool(aParamName: WideString; const aDefault: Boolean): Boolean;
+function TSettingsImpl.GetBool(aParamName: string; const aDefault: Boolean): Boolean;
 begin
   Result := fIniFile.ReadBool(GetSectionName, aParamName, aDefault);
 end;
 
-function TSettingsImpl.GetInt(aParamName: WideString; const aDefault: Integer): Integer;
+function TSettingsImpl.GetInt(aParamName: string; const aDefault: Integer): Integer;
 begin
   Result := fIniFile.ReadInteger(GetSectionName, aParamName, aDefault);
 end;
 
-function TSettingsImpl.GetSectionName: WideString;
+function TSettingsImpl.GetSectionName: string;
 begin
   if fSectionName = '' then
     fSectionName := ChangeFileExt(GetCurrentExecutableModuleName, '');
   Result := fSectionName;
 end;
 
-function TSettingsImpl.GetStr(aParamName: WideString; const aDefault: WideString): WideString;
+function TSettingsImpl.GetStr(aParamName: string; const aDefault: string): string;
 begin
   Result := fIniFile.ReadString(GetSectionName, aParamName, aDefault);
 end;
 
-procedure TSettingsImpl.SetBool(aParamName: WideString; aValue: Boolean);
+procedure TSettingsImpl.SetBool(aParamName: string; aValue: Boolean);
 begin
   fIniFile.WriteBool(GetSectionName, aParamName, aValue);
   fIniFile.UpdateFile;
 end;
 
-procedure TSettingsImpl.SetInt(aParamName: WideString; aValue: Integer);
+procedure TSettingsImpl.SetInt(aParamName: string; aValue: Integer);
 begin
   fIniFile.WriteInteger(GetSectionName, aParamName, aValue);
   fIniFile.UpdateFile;
 end;
 
-procedure TSettingsImpl.SetSectionName(const Value: WideString);
+procedure TSettingsImpl.SetSectionName(const Value: string);
 begin
   fSectionName := Value;
 end;
 
-procedure TSettingsImpl.SetStr(aParamName, aValue: WideString);
+procedure TSettingsImpl.SetStr(aParamName, aValue: string);
 begin
   fIniFile.WriteString(GetSectionName, aParamName, aValue);
   fIniFile.UpdateFile;

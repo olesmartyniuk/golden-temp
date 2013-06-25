@@ -29,7 +29,7 @@ type
     procedure SetShowProgress(Value: boolean);
     function GetVisible: boolean;
     procedure SetVisible(Value: boolean);
-    procedure ShowSplash(const Message: WideString); overload;
+    procedure ShowSplash(const Message: string); overload;
     procedure HideSplash;
   public
     constructor Create(aMainForm: TForm);
@@ -127,7 +127,7 @@ begin
   Show;
 end;
 
-procedure TFormSplash.ShowSplash(const Message: WideString);
+procedure TFormSplash.ShowSplash(const Message: string);
 begin
   LabelMessage.Caption := Message;
   ShowSplash;

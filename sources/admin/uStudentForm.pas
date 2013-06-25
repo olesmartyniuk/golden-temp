@@ -16,6 +16,7 @@ uses
   ExtCtrls,
   Buttons,
   ImgList,
+  Generics.Collections,
   uRemotable;
 
 type
@@ -51,10 +52,7 @@ type
       function IsDataChanged: Boolean;
     public
       Student: TStudent;
-      Groups: TStringList;
-    public
-      constructor Create(AOwner: TComponent);
-      destructor Destroy; override;
+      Groups: TList<TGroup>;
   end;
 
 implementation
@@ -119,26 +117,14 @@ begin
     LabelError.Caption := '';
 end;
 
-constructor TStudentForm.Create(AOwner: TComponent);
-begin
-  inherited;
-  Groups := TStringList.Create;
-end;
-
-destructor TStudentForm.Destroy;
-begin
-  FreeAndNil(Groups);
-  inherited;
-end;
-
 function TStudentForm.IsDataChanged: Boolean;
 begin
-  if Student.Name <> '' then
+  if Student.Id > 0 then
     Result := (Student.Login <> LabeledEditLogin.Text) or (Student.Name <> LabeledEditName.Text) or (Student.Surname <> LabeledEditSurname.Text) or
-      (Student.Password <> LabeledEditPassword.Text) or (Student.Group.Name <> ComboBoxGroups.Text)
+      (Student.Password <> LabeledEditPassword.Text) or (Student.GroupId <> Integer(ComboBoxGroups.Items.Objects[ComboBoxGroups.ItemIndex]))
   else
     Result := ('' <> LabeledEditLogin.Text) or ('' <> LabeledEditName.Text) or ('' <> LabeledEditSurname.Text) or ('' <> LabeledEditPassword.Text) or
-      (cNoGroups <> ComboBoxGroups.Text);
+      ((Integer(ComboBoxGroups.Items.Objects[ComboBoxGroups.ItemIndex])) <> 0);
 end;
 
 procedure TStudentForm.LabeledEditLoginChange(Sender: TObject);
@@ -167,6 +153,9 @@ begin
 end;
 
 procedure TStudentForm.FormShow(Sender: TObject);
+var
+  i: Integer;
+  name: string;
 begin
   LabeledEditLogin.Text := Student.Login;
   if Student.Login <> '' then
@@ -180,11 +169,21 @@ begin
   LabeledEditPassword.Text := Student.Password;
   LabeledEditName.Text := Student.Name;
   LabeledEditSurname.Text := Student.Surname;
-  ComboBoxGroups.Items.AddStrings(Groups);
-  ComboBoxGroups.Items.Insert(0, cNoGroups);
-  ComboBoxGroups.ItemIndex := ComboBoxGroups.Items.IndexOf(Student.Group.name);
-  if ComboBoxGroups.ItemIndex = - 1 then
-    ComboBoxGroups.ItemIndex := 0;
+
+  name := '';
+  for i := 0 to Groups.Count - 1 do
+  begin
+    ComboBoxGroups.Items.AddObject(Groups.Items[i].Name, Pointer(Groups.Items[i].Id));
+    if Groups.Items[i].Id = Student.GroupId then
+      name := Groups.Items[i].Name;
+  end;
+  ComboBoxGroups.Items.InsertObject(0, cNoGroups, nil);
+
+  if name = '' then
+    ComboBoxGroups.ItemIndex := 0
+  else
+    ComboBoxGroups.ItemIndex := ComboBoxGroups.Items.IndexOf(name);
+
   if Groups.Count = 0 then
     ComboBoxGroups.Enabled := False;
   CheckValues;
@@ -209,9 +208,7 @@ begin
     stud.Password := LabeledEditPassword.Text;
     stud.Name := LabeledEditName.Text;
     stud.Surname := LabeledEditSurname.Text;
-
-    if ComboBoxGroups.ItemIndex <> 0 then
-      stud.Group.Name := ComboBoxGroups.Text;
+    stud.GroupId := Integer(ComboBoxGroups.Items.Objects[ComboBoxGroups.ItemIndex]);
 
     splash := Dialog.NewSplash(Self);
     splash.ShowSplash(cAddStudent);

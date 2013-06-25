@@ -33,7 +33,7 @@ type
       FDescription: string;
     published
       property Id: Integer read FId write FId;
-      property name: string read FName write FName;
+      property Name: string read FName write FName;
       property Description: string read FDescription write FDescription;
     public
       procedure CopyFrom(const Group: TGroup);
@@ -54,7 +54,7 @@ type
       property Id: Integer read FId write FId;
       property Login: string read FLogin write FLogin;
       property Password: string read FPassword write FPassword;
-      property name: string read FName write FName;
+      property Name: string read FName write FName;
       property Surname: string read FSurname write FSurname;
       property Pulpit: string read FPulpit write FPulpit;
       property Job: string read FJob write FJob;
@@ -71,22 +71,20 @@ type
       FId: Integer;
       FPassword: string;
       FLogin: string;
-      FGroup: TGroup;
+      FGroupId: Integer;
     published
       property Id: Integer read FId write FId;
       property Login: string read FLogin write FLogin;
       property Password: string read FPassword write FPassword;
-      property name: string read FName write FName;
+      property Name: string read FName write FName;
       property Surname: string read FSurname write FSurname;
       /// <clientQualifier>N</clientQualifier>
       /// <supplierQualifier>1</supplierQualifier>
       /// <directed>True</directed>
       /// <label>знаходиться</label>
-      property Group: TGroup read FGroup write FGroup;
+      property GroupId: Integer read FGroupId write FGroupId;
     public
       procedure CopyFrom(const Student: TStudent);
-      constructor Create;
-      destructor Destroy; override;
   end;
 
   TStudents = array of TStudent;
@@ -96,7 +94,7 @@ type
       Id: Integer;
       Name: string;
       MixQuestions: Boolean;
-      MixVariant: Boolean;
+      MixVariants: Boolean;
       TimeLimit: Word;
       Accessibility: Boolean;
       CanClose: Boolean;
@@ -253,19 +251,7 @@ begin
   FSurname := Student.Surname;
   FPassword := Student.Password;
   FLogin := Student.Login;
-  FGroup.CopyFrom(Student.Group);
-end;
-
-constructor TStudent.Create;
-begin
-  inherited;
-  Group := TGroup.Create;
-end;
-
-destructor TStudent.Destroy;
-begin
-  Group.Free;
-  inherited;
+  FGroupId := Student.GroupId;
 end;
 
 { TTeacher }
