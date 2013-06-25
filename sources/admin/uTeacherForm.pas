@@ -184,7 +184,9 @@ begin
   teach.Name := LabeledEditName.Text;
   teach.Surname := LabeledEditSurname.Text;
   teach.Pulpit := LabeledEditCathedra.Text;
-  if ComboBoxPosition.ItemIndex <> 0 then
+  if ComboBoxPosition.ItemIndex = 0 then
+    teach.Job := ''
+  else
     teach.Job := ComboBoxPosition.Text;
   try
     splash := Dialog.NewSplash(Self);

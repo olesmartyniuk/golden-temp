@@ -178,11 +178,11 @@ begin
     stud := uDatabase.StudentGet(db, Student.Login);
     if Assigned(stud) then
       raise EAlreadyExists.Create(Format('Студент з логіном "%s" вже існує.', [Student.Login]));
-    if Student.Group.Name <> '' then
+    if Student.GroupId > 0 then
     begin
-      group := uDatabase.GroupGet(db, Student.Group.Name);
+      group := uDatabase.GroupGet(db, Student.GroupId);
       if not Assigned(group) then
-        raise ENotExists.Create(Format('Група з іменем "%s" не існує.', [Student.Group.Name]));
+        raise ENotExists.Create(Format('Група з ID "%d" не існує.', [Student.GroupId]));
     end;
     uDatabase.StudentAdd(db, Student);
     Result := Student.Id;

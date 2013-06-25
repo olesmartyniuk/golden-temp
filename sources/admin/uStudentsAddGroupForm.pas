@@ -44,7 +44,7 @@ type
       procedure PrintStudentsList;
     public
       StudentsList: TList<TStudent>;
-      Group: string;
+      Group: TGroup;
       Groups: TList<TGroup>;
   end;
 
@@ -66,8 +66,7 @@ begin
   form := TStudentForm.Create(Self);
   try
     form.Student := TStudent.Create;
-    for i := 0 to Groups.Count - 1 do
-      form.Groups.Add(Groups.Items[i].name);
+    form.Groups := Groups;
     form.ComboBoxGroups.Enabled := False;
     if form.ShowModal = mrOk then
     begin
@@ -101,7 +100,7 @@ begin
         if not ListView.Items[i].Selected then
           Continue;
         student := StudentsList.Items[Integer(ListView.Items[i].Data)];
-        student.Group.Name := Group;
+        student.GroupId := Group.Id;
         server.StudentEdit(Remotable.Account, student);
         ModalResult := mrOk;
       end;
@@ -143,7 +142,7 @@ begin
   for i := 0 to StudentsList.Count - 1 do
   begin
     student := StudentsList.Items[i];
-    if student.Group.Name = '' then
+    if student.GroupId <= 0 then
       with ListView.Items.Add do
       begin
         ImageIndex := 0;
@@ -166,7 +165,7 @@ end;
 
 procedure TFormAddStudent.FormShow(Sender: TObject);
 begin
-  Caption := 'Додати до групи ' + Group;
+  Caption := 'Додати до групи';
   PrintStudentsList;
 end;
 
