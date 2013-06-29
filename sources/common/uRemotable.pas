@@ -227,16 +227,20 @@ type
 
   IAdministrator = interface(IInvokable)
     ['{EE2A67B5-48C1-4A35-80F3-E3D44594C357}']
+
+    // робота з групами
     function GroupAdd(Account: TAccount; Group: TGroup): Integer; stdcall;
     procedure GroupEdit(Account: TAccount; Group: TGroup); stdcall;
     procedure GroupDel(Account: TAccount; const Name: string); stdcall;
     function GroupGet(Account: TAccount): TGroups; stdcall;
 
+    // робота з викладачами
     function TeacherAdd(Account: TAccount; Teacher: TTeacher): Integer; stdcall;
     procedure TeacherEdit(Account: TAccount; Teacher: TTeacher); stdcall;
     procedure TeacherDel(Account: TAccount; TeacherLogin: string); stdcall;
     function TeacherGet(Account: TAccount; const Pulpit: string = ''; const Job: string = ''): TTeachers;
 
+    // робота зі студентами
     function StudentAdd(Account: TAccount; Student: TStudent): Integer; stdcall;
     procedure StudentEdit(Account: TAccount; Student: TStudent);
     procedure StudentDel(Account: TAccount; StudentLogin: string); stdcall;
@@ -247,15 +251,33 @@ type
 
   ITeacher = interface(IInvokable)
     ['{7FC9807B-03BC-4336-8D73-B3006D3AF73F}']
-    function ResultsGet(Account: TAccount; StudentLogin: string; GroupName: string; TestName: string; StartDateFrom: TDateTime; StartDateTo: TDateTime)
-      : TSessions; stdcall;
-    procedure TestEdit(Account: TAccount; TestName: string; Test: TTest); stdcall;
-    procedure TestUnblock(Account: TAccount; Name: string); stdcall;
-    procedure TestBlock(Account: TAccount; Name: string); stdcall;
-    function ToSeeResultsOfTesting(Account: TAccount; StudentLog: string; Answer: TAnswer): TAnswers; stdcall;
-    procedure ToRemoveResultsOfTesting(Account: TAccount; Answer: TAnswer); stdcall;
-    procedure UploadTest(Account: TAccount; Test: TSoapAttachment); stdcall;
-    function DownloadTest(Account: TAccount; TestName: string): TSoapAttachment; stdcall;
+    // отримати тести
+    function TestGet(Account: TAccount): TTests; stdcall;
+
+    // Зміна параметрів тесту
+    procedure TestEdit(Account: TAccount; Test: TTest); stdcall;
+
+    // блокувати тест
+    procedure TestBlock(Account: TAccount; const Name: string); stdcall;
+
+    // розблокувати тест
+    procedure TestUnblock(Account: TAccount; const Name: string); stdcall;
+
+    // вивантажити тест на сервер
+    procedure TestUpload(Account: TAccount; Test: TSoapAttachment); stdcall;
+
+    // завантажити тест з серверу
+    function TestDownload(Account: TAccount; TestName: string): TSoapAttachment; stdcall;
+
+    // отримати результати тестування (якщо якийсь з параметрів порожній, він не використовується при фільтруванні даних)
+    function SessionsGet(Account: TAccount; const StudentLogin: string; const GroupName: string; const TestName: string; StartDateFrom: TDateTime;
+      StartDateTo: TDateTime): TSessions; stdcall;
+
+    // отримати детальні результати конкретної сесії тестування
+    function AnswersGet(Account: TAccount; StudentLog: string; SessionId: Integer): TAnswers; stdcall;
+
+    // видалити сесію тестуваня
+    procedure SessionDel(Account: TAccount; SessionId: Integer); stdcall;
   end;
 
   IStudent = interface(IInvokable)
@@ -282,7 +304,7 @@ implementation
 procedure TStudent.CopyFrom(const Student: TStudent);
 begin
   FId := Student.Id;
-  FName := Student.name;
+  FName := Student.Name;
   FSurname := Student.Surname;
   FPassword := Student.Password;
   FLogin := Student.Login;
@@ -294,7 +316,7 @@ end;
 procedure TTeacher.CopyFrom(const Teacher: TTeacher);
 begin
   FId := Teacher.Id;
-  FName := Teacher.name;
+  FName := Teacher.Name;
   FSurname := Teacher.Surname;
   FPassword := Teacher.Password;
   FLogin := Teacher.Login;
@@ -307,7 +329,7 @@ end;
 procedure TGroup.CopyFrom(const Group: TGroup);
 begin
   FId := Group.Id;
-  FName := Group.name;
+  FName := Group.Name;
   FDescription := Group.Description;
 end;
 
