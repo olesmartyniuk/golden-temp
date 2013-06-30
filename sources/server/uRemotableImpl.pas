@@ -11,12 +11,12 @@ uses
 
 type
 
-  TServerImpl = class(TInvokableClass, IAdministrator)
+  TServerImpl = class(TInvokableClass, IAdministrator, ITeacher)
     private
       function AuthorizeAdmin(const Database: TDatabaseConnect; Account: TAccount): TTeacher;
       function AuthorizeTeacher(const Database: TDatabaseConnect; Account: TAccount): TTeacher;
       procedure CheckNoEmpty(const Value: string);
-    public
+    public // IAdministrator
       function GroupAdd(Account: TAccount; Group: TGroup): Integer; stdcall;
       procedure GroupEdit(Account: TAccount; Group: TGroup); stdcall;
       procedure GroupDel(Account: TAccount; const Name: string); stdcall;
@@ -33,6 +33,18 @@ type
       function StudentGet(Account: TAccount; const Group: string = ''): TStudents; stdcall;
 
       procedure PasswordEdit(Account: TAccount; const PasswordNew: string);
+
+    public // ITeacher
+      function TestGet(Account: TAccount): TTests; stdcall;
+      procedure TestEdit(Account: TAccount; Test: TTest); stdcall;
+      procedure TestBlock(Account: TAccount; const Name: string); stdcall;
+      procedure TestUnblock(Account: TAccount; const Name: string); stdcall;
+      procedure TestUpload(Account: TAccount; Test: TSoapAttachment); stdcall;
+      function TestDownload(Account: TAccount; TestName: string): TSoapAttachment; stdcall;
+      function SessionsGet(Account: TAccount; const StudentLogin: string; const GroupName: string; const TestName: string; StartDateFrom: TDateTime;
+        StartDateTo: TDateTime): TSessions; stdcall;
+      function AnswersGet(Account: TAccount; StudentLog: string; SessionId: Integer): TAnswers; stdcall;
+      procedure SessionDel(Account: TAccount; SessionId: Integer); stdcall;
   end;
 
 implementation
@@ -42,6 +54,11 @@ uses
   uServerState;
 
 { TServerImpl }
+
+function TServerImpl.AnswersGet(Account: TAccount; StudentLog: string; SessionId: Integer): TAnswers;
+begin
+
+end;
 
 function TServerImpl.AuthorizeAdmin(const Database: TDatabaseConnect; Account: TAccount): TTeacher;
 begin
@@ -159,6 +176,16 @@ end;
 procedure TServerImpl.PasswordEdit(Account: TAccount; const PasswordNew: string);
 begin
   // TODO
+end;
+
+procedure TServerImpl.SessionDel(Account: TAccount; SessionId: Integer);
+begin
+
+end;
+
+function TServerImpl.SessionsGet(Account: TAccount; const StudentLogin, GroupName, TestName: string; StartDateFrom, StartDateTo: TDateTime): TSessions;
+begin
+
 end;
 
 function TServerImpl.StudentAdd(Account: TAccount; Student: TStudent): Integer;
@@ -344,6 +371,36 @@ begin
   finally
     DatabaseClose(db);
   end;
+end;
+
+procedure TServerImpl.TestBlock(Account: TAccount; const Name: string);
+begin
+
+end;
+
+function TServerImpl.TestDownload(Account: TAccount; TestName: string): TSoapAttachment;
+begin
+
+end;
+
+procedure TServerImpl.TestEdit(Account: TAccount; Test: TTest);
+begin
+
+end;
+
+function TServerImpl.TestGet(Account: TAccount): TTests;
+begin
+
+end;
+
+procedure TServerImpl.TestUnblock(Account: TAccount; const Name: string);
+begin
+
+end;
+
+procedure TServerImpl.TestUpload(Account: TAccount; Test: TSoapAttachment);
+begin
+
 end;
 
 initialization
