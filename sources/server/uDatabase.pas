@@ -6,17 +6,20 @@ uses
   Classes,
   Windows,
   SysUtils,
+  StrUtils,
   Dialogs,
   FIBDatabase,
   pFIBDatabase,
   FIBQuery,
   pFIBQuery,
+  pFIBScripter,
   uRemotable;
 
 type
   TDatabaseConnect = TpFibDataBase;
   TDatabaseQuery = TpFibQuery;
 
+function DatabaseCreate(const AdminPassword: string): Boolean;
 function DatabaseOpen: TDatabaseConnect;
 procedure DatabaseClose(ADatabase: TDatabaseConnect);
 function QueryOpen(ADatabase: TDatabaseConnect): TDatabaseQuery;
@@ -32,16 +35,16 @@ procedure GroupEdit(const Database: TDatabaseConnect; const GroupId: Integer; Gr
 procedure StudentAdd(const Database: TDatabaseConnect; const Student: TStudent);
 function StudentGet(const Database: TDatabaseConnect; const StudentLogin: string): TStudent; overload;
 function StudentGet(const Database: TDatabaseConnect; const StudentId: Integer): TStudent; overload;
-function StudentGetMany(const Database: TDatabaseConnect; const StudentLogin: string = '%'; const StudentName: string = '%'; const StudentSurname: string = '%'; StudentGroup: string = '%')
-  : TStudents;
+function StudentGetMany(const Database: TDatabaseConnect; const StudentLogin: string = '%'; const StudentName: string = '%'; const StudentSurname: string = '%';
+  StudentGroup: string = '%'): TStudents;
 procedure StudentEdit(const Database: TDatabaseConnect; const Student: TStudent);
 procedure StudentDel(const Database: TDatabaseConnect; const StudentLogin: string); overload;
 procedure StudentDel(const Database: TDatabaseConnect; const StudentId: Integer); overload;
 
 function TeacherGet(const Database: TDatabaseConnect; const TeacherLogin: string): TTeacher; overload;
 function TeacherGet(const Database: TDatabaseConnect; const TeacherId: Integer): TTeacher; overload;
-function TeacherGetMany(const Database: TDatabaseConnect; const TeacherLogin: string = '%'; const TeacherName: string = '%'; const TeacherSurname: string = '%'; const Pulpit: string = '%')
-  : TTeachers;
+function TeacherGetMany(const Database: TDatabaseConnect; const TeacherLogin: string = '%'; const TeacherName: string = '%'; const TeacherSurname: string = '%';
+  const Pulpit: string = '%'): TTeachers;
 procedure TeacherAdd(const Database: TDatabaseConnect; const Teacher: TTeacher);
 procedure TeacherDel(const Database: TDatabaseConnect; const TeacherLogin: string);
 procedure TeacherEdit(const Database: TDatabaseConnect; const Teacher: TTeacher);
@@ -49,7 +52,7 @@ procedure TeacherEdit(const Database: TDatabaseConnect; const Teacher: TTeacher)
 procedure ChangeTeacherPassword(const Database: TDatabaseConnect; Account: TAccount; const NewPassword: string);
 procedure ChangeStudentPassword(const Database: TDatabaseConnect; const Login, NewPassword: string);
 
-function AdminPasswordPresent: Boolean;
+function AdminPasswordPresent(const Database: TDatabaseConnect): Boolean;
 procedure SetAdminPassword(const Database: TDatabaseConnect; const Password: string);
 
 implementation
@@ -57,6 +60,35 @@ implementation
 uses
   uConfig,
   Math;
+
+function DatabaseCreate(const AdminPassword: string): Boolean;
+var
+  db: TDatabaseConnect;
+  scripter: TpFIBScripter;
+  script: TStringList;
+begin
+  scripter := TpFIBScripter.Create(nil);
+  try
+    script := TStringList.Create;
+    try
+      script.LoadFromFile(GetDirBin + '\database.sql');
+      script.Text := ReplaceStr(script.Text, '{DATABASE}', GetDatabasePath);
+      scripter.Script.AddStrings(script);
+      scripter.ExecuteScript();
+    finally
+      script.Free;
+    end;
+  finally
+    scripter.Free;
+  end;
+  db := DatabaseOpen;
+  try
+    SetAdminPassword(db, AdminPassword);
+    Result := True;
+  finally
+    DatabaseClose(db);
+  end;
+end;
 
 function DatabaseOpen: TDatabaseConnect;
 var
@@ -226,7 +258,7 @@ begin
     else
       group := nil;
 
-    query.SQL.Text := 'insert into STUDENTS (LOGIN, PASSW, NAME, SURNAME, ID_GROUP) values (:LOGIN, :PASSW, :NAME, :SURNAME, :GROUPID) returning ID';
+    query.SQL.Text := 'insert into STUDENT (LOGIN, PASSW, NAME, SURNAME, GROUP_ID) values (:LOGIN, :PASSW, :NAME, :SURNAME, :GROUPID) returning ID';
     query.ParamByName('LOGIN').AsString := Student.Login;
     query.ParamByName('PASSW').AsString := Student.Password;
     query.ParamByName('NAME').AsString := Student.Name;
@@ -269,7 +301,7 @@ begin
   end;
 end;
 
-function StudentGet(const Database: TDatabaseConnect;const StudentId: Integer): TStudent;
+function StudentGet(const Database: TDatabaseConnect; const StudentId: Integer): TStudent;
 var
   query: TDatabaseQuery;
 begin
@@ -294,8 +326,8 @@ begin
   end;
 end;
 
-function StudentGetMany(const Database: TDatabaseConnect; const StudentLogin: string = '%'; const StudentName: string = '%'; const StudentSurname: string = '%'; StudentGroup: string = '%')
-  : TStudents;
+function StudentGetMany(const Database: TDatabaseConnect; const StudentLogin: string = '%'; const StudentName: string = '%'; const StudentSurname: string = '%';
+  StudentGroup: string = '%'): TStudents;
 var
   query: TDatabaseQuery;
 begin
@@ -314,7 +346,7 @@ begin
       end
       else
       begin
-        query.SQL.Text := 'select STUDENTS.* from STUDENTS left join GROUPS on STUDENTS.ID_GROUP=GROUPS.ID ' +
+        query.SQL.Text := 'select STUDENTS.* from STUDENT left join GROUPS on STUDENTS.ID_GROUP=GROUPS.ID ' +
           'where STUDENTS.LOGIN like :LOGIN and STUDENTS.NAME like :NAME and STUDENTS.SURNAME like :SURNAME and GROUPS.NAME like :GROUP';
         query.ParamByName('LOGIN').AsString := StudentLogin;
         query.ParamByName('NAME').AsString := StudentName;
@@ -331,7 +363,7 @@ begin
         Result[high(Result)].Password := query.FldByName['PASSW'].AsString;
         Result[high(Result)].Name := query.FldByName['NAME'].AsString;
         Result[high(Result)].Surname := query.FldByName['SURNAME'].AsString;
-        Result[high(Result)].GroupId := query.FldByName['ID_GROUP'].AsInteger;
+        Result[high(Result)].GroupId := query.FldByName['GROUP_ID'].AsInteger;
         query.Next;
       end;
     end;
@@ -381,7 +413,7 @@ begin
     else
       group := nil;
 
-    query.SQL.SetText('update STUDENTS set LOGIN=:LOGIN, PASSW=:PASSW, NAME=:NAME, SURNAME=:SURNAME, ID_GROUP=:GROUPID where ID=:ID');
+    query.SQL.SetText('update STUDENTS set LOGIN=:LOGIN, PASSW=:PASSW, NAME=:NAME, SURNAME=:SURNAME, GROUP_ID=:GROUPID where ID=:ID');
     query.ParamByName('ID').AsInteger := Student.Id;
     query.ParamByName('LOGIN').AsString := Student.Login;
     query.ParamByName('PASSW').AsString := Student.Password;
@@ -456,8 +488,8 @@ begin
   end;
 end;
 
-function TeacherGetMany(const Database: TDatabaseConnect; const TeacherLogin: string = '%'; const TeacherName: string = '%'; const TeacherSurname: string = '%'; const Pulpit: string = '%')
-  : TTeachers;
+function TeacherGetMany(const Database: TDatabaseConnect; const TeacherLogin: string = '%'; const TeacherName: string = '%'; const TeacherSurname: string = '%';
+  const Pulpit: string = '%'): TTeachers;
 var
   query: TDatabaseQuery;
 begin
@@ -580,26 +612,19 @@ begin
   end;
 end;
 
-function AdminPasswordPresent: Boolean;
+function AdminPasswordPresent(const Database: TDatabaseConnect): Boolean;
 var
   query: TDatabaseQuery;
-  Transaction: TpFibTransaction;
-  Database: TpFibDataBase;
 begin
   query := QueryOpen(Database);
   try
-    Transaction.StartTransaction;
     query.SQL.SetText('select * from TEACHERS where LOGIN=:LOGIN');
     query.ParamByName('LOGIN').AsString := 'admin';
     query.ExecQuery;
     if query.Eof then
-    begin
-      Transaction.Rollback;
-      raise ENoAuthorize.Create(Format('Викладач %s не існує в базі ', ['admin']));
-    end
+      raise ENoAuthorize.Create('Admin не існує в базі ')
     else
       Result := not query.FldByName['PASSW'].IsNull;
-    Transaction.Commit;
   finally
     QueryClose(query);
   end;
@@ -611,7 +636,7 @@ var
 begin
   query := QueryOpen(Database);
   try
-    query.SQL.SetText('update TEACHERS set PASSW=:PASSWORD where LOGIN=:LOGIN');
+    query.SQL.Text := 'update TEACHERS set PASSW=:PASSWORD where LOGIN=:LOGIN';
     query.ParamByName('LOGIN').AsString := 'admin';
     query.ParamByName('PASSWORD').AsString := Password;
     query.ExecQuery;

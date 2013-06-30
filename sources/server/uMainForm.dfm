@@ -40,6 +40,16 @@ object MainForm: TMainForm
     TabOrder = 2
     OnClick = ButtonOpenBrowserClick
   end
+  object ButtonDbCreate: TButton
+    Left = 166
+    Top = 48
+    Width = 225
+    Height = 49
+    Caption = #1057#1090#1074#1086#1088#1080#1090#1080' '#1073#1072#1079#1091' '#1076#1072#1085#1080#1093' ('#1087#1072#1088#1086#1083#1100' '#1072#1076#1084#1110#1085#1072' 123)'
+    TabOrder = 3
+    WordWrap = True
+    OnClick = ButtonDbCreateClick
+  end
   object ApplicationEvents: TApplicationEvents
     OnIdle = ApplicationEventsIdle
     Left = 176

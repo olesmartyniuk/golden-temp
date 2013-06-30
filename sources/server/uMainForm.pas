@@ -21,10 +21,12 @@ type
     ButtonStop: TButton;
     ApplicationEvents: TApplicationEvents;
     ButtonOpenBrowser: TButton;
+    ButtonDbCreate: TButton;
     procedure ButtonStartClick(Sender: TObject);
     procedure ButtonOpenBrowserClick(Sender: TObject);
     procedure ButtonStopClick(Sender: TObject);
     procedure ApplicationEventsIdle(Sender: TObject; var Done: Boolean);
+    procedure ButtonDbCreateClick(Sender: TObject);
     private
     public
   end;
@@ -38,6 +40,7 @@ implementation
 
 uses
   Winapi.ShellApi,
+  uDatabase,
   uServerState;
 
 procedure TMainForm.ApplicationEventsIdle(Sender: TObject; var Done: Boolean);
@@ -53,6 +56,11 @@ begin
     ButtonStop.Enabled := True;
     ButtonOpenBrowser.Enabled := True;
   end;
+end;
+
+procedure TMainForm.ButtonDbCreateClick(Sender: TObject);
+begin
+  DatabaseCreate('123');
 end;
 
 procedure TMainForm.ButtonOpenBrowserClick(Sender: TObject);
