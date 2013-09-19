@@ -273,7 +273,7 @@ type
     function SessionsGet(Account: TAccount; const StudentLogin: string; const GroupName: string; const TestName: string; StartDateFrom: TDateTime;
       StartDateTo: TDateTime): TSessions; stdcall;
 
-    // отримати детальні результати конкретної сесії тестування
+    // отримати детальні результати сесії тестування
     function AnswersGet(Account: TAccount; StudentLog: string; SessionId: Integer): TAnswers; stdcall;
 
     // видалити сесію тестуваня
