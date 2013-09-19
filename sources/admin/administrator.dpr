@@ -17,8 +17,7 @@ uses
   uAccountForm in 'uAccountForm.pas' {AccountForm},
   uChangePasswordForm in 'uChangePasswordForm.pas' {PasswordForm},
   uInterfaces in '..\common\uInterfaces.pas',
-  uFactories in '..\common\uFactories.pas',
-  uSplashFrom in '..\implement\gui\splash\uSplashFrom.pas' {FormSplash};
+  uFactories in '..\common\uFactories.pas';
 
 {$R *.res}
 

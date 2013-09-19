@@ -74,9 +74,9 @@
 			<DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
 			<VerInfo_Locale>1033</VerInfo_Locale>
 			<Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
-			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1)'!=''">
+			<DCC_UnitSearchPath>$(GT_BIN);$(GT_COMMON)\;$(GT_IMPORTS)\ICS;$(GT_IMPORTS)\JCL;$(GT_SOURCES)\implement\gui\splash\;$(GT_SOURCES)\implement\core;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
 			<DCC_Optimize>false</DCC_Optimize>
 			<DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
@@ -117,11 +117,16 @@
 				<DesignClass>TWebModule</DesignClass>
 			</DCCReference>
 			<DCCReference Include="uRemotableImpl.pas"/>
-			<DCCReference Include="..\common\uRemotable.pas"/>
 			<DCCReference Include="uDatabase.pas"/>
-			<DCCReference Include="..\common\uConfig.pas"/>
 			<DCCReference Include="uServerState.pas"/>
+			<DCCReference Include="..\common\uConfig.pas"/>
 			<DCCReference Include="..\common\uDebug.pas"/>
+			<DCCReference Include="..\common\uFactories.pas"/>
+			<DCCReference Include="..\common\uInterfaces.pas"/>
+			<DCCReference Include="..\common\uQuizeImpl.pas"/>
+			<DCCReference Include="..\common\uRemotable.pas"/>
+			<DCCReference Include="..\common\uStreamImpl.pas"/>
+			<DCCReference Include="..\common\uUtils.pas"/>
 			<None Include="ModelSupport_server\default.txaPackage"/>
 			<None Include="ModelSupport_server\default.txvpck"/>
 			<None Include="ModelSupport_server\uRemotable\default.txvpck"/>

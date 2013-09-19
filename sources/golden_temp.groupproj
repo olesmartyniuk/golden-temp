@@ -12,6 +12,9 @@
 			<Projects Include="tests\tests.dproj">
 				<Dependencies/>
 			</Projects>
+			<Projects Include="editor\editor.dproj">
+				<Dependencies/>
+			</Projects>
 		</ItemGroup>
 		<ProjectExtensions>
 			<Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -47,14 +50,23 @@
 		<Target Name="tests:Make">
 			<MSBuild Projects="tests\tests.dproj" Targets="Make"/>
 		</Target>
+		<Target Name="editor">
+			<MSBuild Projects="editor\editor.dproj"/>
+		</Target>
+		<Target Name="editor:Clean">
+			<MSBuild Projects="editor\editor.dproj" Targets="Clean"/>
+		</Target>
+		<Target Name="editor:Make">
+			<MSBuild Projects="editor\editor.dproj" Targets="Make"/>
+		</Target>
 		<Target Name="Build">
-			<CallTarget Targets="server;administrator;tests"/>
+			<CallTarget Targets="server;administrator;tests;editor"/>
 		</Target>
 		<Target Name="Clean">
-			<CallTarget Targets="server:Clean;administrator:Clean;tests:Clean"/>
+			<CallTarget Targets="server:Clean;administrator:Clean;tests:Clean;editor:Clean"/>
 		</Target>
 		<Target Name="Make">
-			<CallTarget Targets="server:Make;administrator:Make;tests:Make"/>
+			<CallTarget Targets="server:Make;administrator:Make;tests:Make;editor:Make"/>
 		</Target>
 		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')" Project="$(BDS)\Bin\CodeGear.Group.Targets"/>
 	</Project>
