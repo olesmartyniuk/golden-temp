@@ -8,11 +8,16 @@ uses
   uMainForm in 'uMainForm.pas' {MainForm},
   uWebModule in 'uWebModule.pas' {ServerWebModule: TWebModule},
   uRemotableImpl in 'uRemotableImpl.pas',
-  uRemotable in '..\common\uRemotable.pas',
   uDatabase in 'uDatabase.pas',
-  uConfig in '..\common\uConfig.pas',
   uServerState in 'uServerState.pas',
-  uDebug in '..\common\uDebug.pas';
+  uConfig in '..\common\uConfig.pas',
+  uDebug in '..\common\uDebug.pas',
+  uFactories in '..\common\uFactories.pas',
+  uInterfaces in '..\common\uInterfaces.pas',
+  uQuizeImpl in '..\common\uQuizeImpl.pas',
+  uRemotable in '..\common\uRemotable.pas',
+  uStreamImpl in '..\common\uStreamImpl.pas',
+  uUtils in '..\common\uUtils.pas';
 
 {$R *.res}
 

@@ -1070,7 +1070,7 @@ begin
   if not Assigned(FSplash) then
   begin
     FSplash := Dialog.NewSplash(Self);
-    FSplash.ShowProgress := False;
+//    FSplash.ShowProgress := False;
   end;
   Result := fSplash;
 end;
