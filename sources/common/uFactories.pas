@@ -14,7 +14,10 @@ type
 
   Core = class
     public
+      class function NewStream(): IStream; overload;
+      class function NewStream(const AFileName: string): IStream; overload;
       class function NewSettings(const ASection: string = ''): ISettings;
+      class function NewList<T>: IList<T>;
   end;
 
   Remotable = class
@@ -40,14 +43,16 @@ type
 implementation
 
 uses
-  uSplashImpl,
-  uSettingsImpl;
+  uSplashForm,
+  uSettingsImpl,
+  uStreamImpl,
+  uListImpl;
 
 { Dialog }
 
 class function Dialog.NewSplash(MainForm: TForm): ISplash;
 begin
-  Result := TFormSplash.Create(MainForm);
+  Result := TSplashImpl.Create(MainForm);
 end;
 
 class procedure Dialog.ShowWarningMessage(const AMessage: string; AForm: TForm);
@@ -95,10 +100,31 @@ end;
 
 { Core }
 
+class function Core.NewList<T>: IList<T>;
+begin
+  Result := TInterfacedList<T>.Create;
+end;
+
 class function Core.NewSettings(const ASection: string): ISettings;
 begin
   Result := TSettingsImpl.Create;
   Result.SectionName := ASection;
+end;
+
+class function Core.NewStream(const AFileName: string): IStream;
+begin
+  if FileExists(AFileName) then
+  begin
+    Result := NewStream;
+    Result.LoadFromFile(AFileName);
+  end
+  else
+    Result := nil;
+end;
+
+class function Core.NewStream: IStream;
+begin
+  Result := TStream_.Create();
 end;
 
 end.
